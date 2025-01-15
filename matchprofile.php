@@ -1,10 +1,7 @@
 <?php
 
-// Database connection details
-$servername = "localhost";  // Your database server
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "zuzelelo";
+include 'includes/sqlCall.php';
+include 'includes/topbar.php';
 
 
 try {
