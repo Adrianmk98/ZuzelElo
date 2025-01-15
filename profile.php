@@ -1,20 +1,6 @@
 <?php
-// Database connection details
-$servername = "localhost";  // Your database server
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "zuzelelo";
-      
-
-?>
-<?php
-// Create connection
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'includes/sqlCall.php';
+include 'includes/topbar.php';
 
 // Get the player ID from the URL parameter (e.g., player_profile.php?id=1)
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
@@ -67,6 +53,30 @@ $stmt_matchinfo->bind_param("i", $player_id);
 $stmt_matchinfo->execute();
 $result_matchinfo = $stmt_matchinfo->get_result();
 
+$sql_career= "SELECT 
+                    m.yearnum AS Year,
+                    t.teamName AS Team,
+                    SUM(h.Score) AS Score,
+                    SUM(h.Bonus) As Bonus,
+                    COUNT(h.heatNumber) AS TotalRaces,
+                    SUM(h.PPA) AS TotalPPA
+                FROM 
+                    heatinformation h
+                JOIN 
+                    team t ON h.currentplayerteamID = t.teamID
+                JOIN 
+                    matches m ON h.matchID = m.matchID
+                WHERE 
+                    h.playerID = ?
+                GROUP BY 
+                    m.yearnum, t.teamName
+                ORDER BY 
+                    m.yearnum DESC, t.teamName;
+            ";
+$stmt_careerinfo= $conn->prepare($sql_career);
+$stmt_careerinfo->bind_param("i", $player_id);
+$stmt_careerinfo->execute();
+$result_careerinfo = $stmt_careerinfo->get_result();
 
 $AdvancedAnalytics="
 SELECT SUM(h.PPO) as PPO, SUM(h.PPA) as PPA,COUNT(DISTINCT h.matchID) AS gamesPlayed,
@@ -149,6 +159,27 @@ if ($result_team->num_rows > 0) {
             margin-bottom: 10px;
         }
         .profile-container .details span {
+            font-weight: bold;
+        }
+        .profile-containercareer {
+            border: 1px solid #ddd;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+        }
+        .profile-containercareer h1 {
+            text-align: center;
+            color: #333;
+        }
+        .profile-containercareer p {
+            font-size: 16px;
+            color: #555;
+        }
+        .profile-containercareer .details {
+            margin-bottom: 10px;
+        }
+        .profile-containercareer .details span {
             font-weight: bold;
         }
     </style>
@@ -269,6 +300,7 @@ if ($result_team->num_rows > 0) {
                     <td><?php echo htmlspecialchars($row['Score']); ?></td>
                     <td><?php echo htmlspecialchars($row['projectedPoints']); ?></td>
                     <td><?php echo htmlspecialchars($row['PPA']); ?></td>
+
                 </tr>
             <?php endwhile; ?>
             </tbody>
@@ -276,10 +308,37 @@ if ($result_team->num_rows > 0) {
     </div>
 </div>
 
-<div class="profile-containercareer" id="profileContainercareer" style="display: none;">
+<div class="profile-containercareer" id="profileContainercareer" style="display: none; ">
     <h1>Race Information</h1>
     <div class="details">
+        <table border="1">
+            <thead>
+            <tr>
+                <th>Year</th>
+                <th>Team</th>
+                <th>Score</th>
+                <th>Bonus</th>
+                <th>Races</th>
+                <th>PPA</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
 
+
+
+            while ($row = $result_careerinfo->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['Year']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Team']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Score']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Bonus']); ?></td>
+                    <td><?php echo htmlspecialchars($row['TotalRaces']); ?></td>
+                    <td><?php echo htmlspecialchars($row['TotalPPA']); ?></td>
+                </tr>
+            <?php endwhile; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 

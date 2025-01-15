@@ -1,13 +1,7 @@
 <?php
 
-// Database connection details
-$servername = "localhost";  // Your database server
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "zuzelelo";
-
-
-include 'topbar.php';
+include 'includes/sqlCall.php';
+include 'includes/topbar.php';
 try {
     // Connect to the database
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8mb4", $dbusername, $dbpassword);
