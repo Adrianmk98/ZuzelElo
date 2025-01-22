@@ -1,5 +1,4 @@
 <?php
-
 include 'includes/sqlCall.php';
 include 'includes/topbar.php';
 try {
@@ -55,12 +54,21 @@ try {
     body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
     h1, h2 { color: #333; }
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    table th, table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    table th, table td { border: 1px solid #ddd; padding: 10px; text-align: center; background-color: #f4f4f4; }
     table th { background-color: #f4f4f4; }
-    .match-header { margin-bottom: 10px; font-size: 1.2em; color: #444; }
+    .match-header {
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+        color: white; /* Text color */
+        padding: 10px 20px; /* Adds some space around the text */
+        border-radius: 5px; /* Optional: rounds the corners for a softer look */
+        font-size: 18px; /* Optional: adjust the font size */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Optional: adds a shadow behind the text to make it stand out */
+        text-align: center;
+
+    }
+
     .heat-table { margin-bottom: 40px; }
 </style>
-
 <?php
 $counterin1=0;
 $counterin2=0;
@@ -103,14 +111,15 @@ foreach ($matchesByWeek as $weekHeader => $matches) {
         echo "</tr>";
         if($row['awayTeamProjectedScore']>45 && $row['awayTeamScore']<$row['homeTeamScore'] || $row['homeTeamProjectedScore']>45 && $row['homeTeamScore']<$row['awayTeamScore'])
         {$wrongwinner++;
-        echo "WRONGWINNER DETECTED";}
+        //echo "WRONGWINNER DETECTED";
+            }
     }
     echo "</table>";
 
 }
-echo "Close: ".$counterin1.'<br>';
-echo "Close in 2: ".$counterin2.'<br>';
-echo "Wrong Winner: ".$wrongwinner;
+//echo "Close: ".$counterin1.'<br>';
+//echo "Close in 2: ".$counterin2.'<br>';
+//echo "Wrong Winner: ".$wrongwinner;
 ?>
 
 

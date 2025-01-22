@@ -1,20 +1,6 @@
 <?php
-// Database connection details
-$servername = "localhost";  // Your database server
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "zuzelelo";
-      
-
-?>
-<?php
-// Create connection
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'includes/sqlCall.php';
+include 'includes/topbar.php';
 
 // Fetch players from the database
 $sql = "SELECT PlayerID, FirstName, LastName, Elo FROM player";  // Assuming you have a 'players' table
@@ -42,6 +28,7 @@ $conn->close();
     <style>
         body {
             font-family: Arial, sans-serif;
+
         }
         table {
             border-collapse: collapse;
@@ -52,6 +39,7 @@ $conn->close();
             border: 1px solid #ddd;
             padding: 8px;
             text-align: center;
+            background-color: #f4f4f4;
         }
         th {
             background-color: #f4f4f4;
@@ -98,6 +86,24 @@ $conn->close();
             height: 90px;
             width: 100px;
         }
+        h1, h2 {
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+            color: white; /* Text color */
+            padding: 15px 30px; /* Adds more space for headers */
+            border-radius: 5px; /* Optional: rounds the corners for a softer look */
+            font-size: inherit; /* Inherit the font size from the default styles for consistency */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds a shadow behind the text for better contrast */
+            text-align: center;
+        }
+
+        /* Optional: Adjust h1 and h2 sizes for emphasis */
+        h1 {
+            font-size: 36px; /* Larger font for h1 */
+        }
+
+        h2 {
+            font-size: 28px; /* Slightly smaller for h2 */
+        }
     </style>
     <script>
         // JavaScript to update player details when a player is selected from dropdown
@@ -121,9 +127,9 @@ function updatePlayerDetails(playerId, playerIndex) {
     </script>
 </head>
 <body>
-    <h1>Elo Simulator for a Single Race</h1>
+<h1>Elo Simulator</h1>
     <form method="post">
-        <h2>Player Elo Ratings</h2>
+        <h1>Player Elo Ratings</h1>
         <table>
             <tr>
                 <th>Player</th>
@@ -167,28 +173,6 @@ function updatePlayerDetails(playerId, playerIndex) {
             </tr>
         </table>
 
-        <h2>Race Results</h2>
-        <table>
-            <tr>
-                <th>Position</th>
-                <?php
-                for ($i = 1; $i <= 4; $i++) {
-                    echo "<th>$i</th>";
-                }
-                ?>
-            </tr>
-            <tr>
-                <th>Player Number</th>
-                <?php
-                for ($i = 1; $i <= 4; $i++) {
-                    $value = isset($_POST["place_$i"]) ? htmlspecialchars($_POST["place_$i"]) : "";
-                    echo "<td><input type='number' name='place_$i' value='$value'></td>";
-                }
-                ?>
-            </tr>
-        </table>
-
-        <button type="submit" name="submit">Submit Results</button>
         <button type="submit" name="simulate">Simulate Race</button>
     </form>
 
@@ -232,7 +216,7 @@ for ($i = 1; $i <= 4; $i++) {
             for ($j = 1; $j <= 4; $j++) {
                 if ($i !== $j && $ratings[$j] !== null) {
                     // Calculate pairwise probability based on Elo difference between players
-                    $probabilities[$i] *= 1 / (1 + pow(10, ($ratings[$j] - $ratings[$i]) / 800));
+                    $probabilities[$i] *= 1 / (1 + pow(10, ($ratings[$j] - $ratings[$i]) / 1600));
                 }
             }
             $totalProbability += $probabilities[$i];  // Accumulate total probability
@@ -258,7 +242,7 @@ function calculateRankedProbabilities($ratings) {
             if ($playerA === $playerB) {
                 $pairwiseProbabilities[$playerA][$playerB] = 0.5;
             } else {
-                $pairwiseProbabilities[$playerA][$playerB] = 1 / (1 + pow(10, ($ratingB - $ratingA) / 400));
+                $pairwiseProbabilities[$playerA][$playerB] = 1 / (1 + pow(10, ($ratingB - $ratingA) / 1600));
             }
         }
     }
@@ -342,7 +326,7 @@ function generatePermutations($items) {
                 $expectedScores[$player] = 0;
                 foreach ($outcomes as $opponent) {
                     if ($player !== $opponent) {
-                        $expectedScores[$player] += 1 / (1 + pow(10, ($ratings[$opponent] - $ratings[$player]) / 400));
+                        $expectedScores[$player] += 1 / (1 + pow(10, ($ratings[$opponent] - $ratings[$player]) / 1600));
                     }
                 }
                 $expectedScores[$player] /= 3; // Normalize
@@ -401,13 +385,9 @@ $order=[];
         }
     }
 
-    // Sort players by expected points in descending order
-    usort($playerData, function($a, $b) {
-        return $b['expectedPoints'] <=> $a['expectedPoints'];
-    });
 
     // Display sorted table
-    echo "<h2>Probabilities and Expected Points</h2><table>";
+    echo "<h2 style='text-align: center;'>Probabilities and Expected Points</h2><table>";
     echo "<tr><th>Player</th><th>1st Place Probability (%)</th><th>2nd Place Probability (%)</th><th>3rd Place Probability (%)</th><th>4th Place Probability (%)</th><th>Expected Points</th></tr>";
 $i=1;
     foreach ($playerData as $data) {
@@ -417,18 +397,20 @@ $i=1;
         
 
         //🟥 🟦 ⬜ 🟨
-        if($i==1){
-                    echo "<tr><td> ".  $data['player']."</td>";}
-                    elseif($i==2){
-                    echo "<tr><td> ".  $data['player']."</td>";}
-                    elseif($i==3){
-                    echo "<tr><td> ".  $data['player']."</td>";}
-                    elseif($i==4){
-                    echo "<tr><td>".  $data['player']."</td>";}
-                    else{
-                    echo "<tr><td>Player $player</td>";}
-                
-        
+        if ($i == 1) {
+            echo "<tr><td>🟥". htmlspecialchars($playerNames[$data['player']] ?? "Player 1") . "</td>";
+        } elseif ($i == 2) {
+            echo "<tr><td>🟦". htmlspecialchars($playerNames[$data['player']] ?? "Player 2") . "</td>";
+        } elseif ($i == 3) {
+            echo "<tr><td>⬜" . htmlspecialchars($playerNames[$data['player']] ?? "Player 3") . "</td>";
+        } elseif ($i == 4) {
+            echo "<tr><td>🟨". htmlspecialchars($playerNames[$data['player']] ?? "Player 4") . "</td>";
+        } else {
+            echo "<tr><td>Player $player</td>";
+        }
+
+
+
         echo"
                 <td>" . round($probabilities[0] * 100, 2) . "%</td>
                 <td>" . round($probabilities[1] * 100, 2) . "%</td>
@@ -461,24 +443,10 @@ $i=1;
         if (count($outcomes) === 4) {
             [$ratings, $eloChanges] = updateRatings($ratings, $outcomes);
 
-            // Updated Elo Ratings
-echo "<h2>Updated Elo Ratings</h2><table><tr>";
-for ($i = 1; $i <= 4; $i++) {
-    if ($ratings[$i] !== null) {
-        echo "<th>" . $playerNames[$i] . "</th>"; // Use dynamic player name here
-    }
-}
-echo "</tr><tr>";
-for ($i = 1; $i <= 4; $i++) {
-    if ($ratings[$i] !== null) {
-        echo "<td>" . round($ratings[$i]) . " (" . round($eloChanges[$i], 1) . ")</td>";
-    }
-}
-echo "</tr></table>";
 
 
             // Podium display
-echo "<h2>Podium</h2>";
+echo "<h2 style='text-align: center;'>Podium</h2>";
 echo "<div class='podium'>";
 echo "<div class='place place-2'>2nd<br>" . $playerNames[$outcomes[1]] . "</div>"; // 2nd place
 echo "<div class='place place-1'>1st<br>" . $playerNames[$outcomes[0]] . "</div>"; // 1st place (center)

@@ -272,7 +272,19 @@ if ($result_team->num_rows > 0) {
     <div class="details">
         <p><span>Elo Rating:</span> <?php echo htmlspecialchars($elo); ?></p>
         <p><span>Team:</span> <?php echo htmlspecialchars($team_name); ?></p>
+        <?php
+        if($PPA !=0)
+        {
+        ?>
         <p><span>Points Above Average (Per Race):</span> <?php echo htmlspecialchars($PPA) . " (" . round($PPA / $racesnum, 2) . ")"; ?></p>
+        <?php
+        }else{
+            ?>
+            <p><span>Points Above Average (Per Race):</span> <?php echo htmlspecialchars($PPA) . " (" . round(0, 2) . ")"; ?></p>
+        <?php
+        }
+
+        ?>
         <button id="toggleButton">Show Race Information</button>
         <button id="toggleButtonCareer">Show Career Info</button>
     </div>
@@ -309,7 +321,7 @@ if ($result_team->num_rows > 0) {
 </div>
 
 <div class="profile-containercareer" id="profileContainercareer" style="display: none; ">
-    <h1>Race Information</h1>
+    <h1>Career</h1>
     <div class="details">
         <table border="1">
             <thead>

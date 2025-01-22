@@ -10,9 +10,32 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
+        body {
+            background-image: url('Includes/background.jpg'); /* Path to your image */
+            background-size: cover; /* Ensures the image covers the full page */
+            background-position: center; /* Centers the image */
+            background-attachment: fixed; /* Fixes the background when scrolling */
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw; /* Ensures full width */
+            height: 100vh; /* Ensures full height */
+            z-index: -1; /* Ensures the overlay is behind other content */
+
+        }
+
         .topnav {
             overflow: hidden;
             background-color: #333;
+            position: fixed; /* Fixes the topnav to the top */
+            top: 0;
+            left: 0;
+            width: 100%; /* Ensures it spans the full width */
+            z-index: 1000; /* Ensures it's above other elements */
         }
 
         .topnav a {
@@ -38,7 +61,13 @@
 <body>
 <div class="topnav">
     <a class="active" href="main.php">Home</a>
+    <a href="matches.php">Matches</a>
+    <a href="elochecker.php">Race Simulator</a>
+    <a href="freeAgents.php">Free Agents</a>
+    <a href="leagueplayers.php">Teams</a>
+    <a href="tabela.php">Standings</a>
     <a href="#">Logout</a>
 </div>
 </body>
+<br><br>
 </html>
