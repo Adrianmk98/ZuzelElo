@@ -34,29 +34,10 @@ if (count($players) >= 4) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main</title>
+    <link rel="stylesheet" href="includes/tableStyle.css">
+    <link rel="stylesheet" href="includes/headerStyle.css">
     <style>
         body { font-family: Arial, sans-serif; }
-        table { border-collapse: collapse; width: 80%; margin: 0 auto 20px;  }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f4f4f4; }
-        th { background-color: #f4f4f4; }
-        h1, h2 {
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-            color: white; /* Text color */
-            padding: 15px 30px; /* Adds more space for headers */
-            border-radius: 5px; /* Optional: rounds the corners for a softer look */
-            font-size: inherit; /* Inherit the font size from the default styles for consistency */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds a shadow behind the text for better contrast */
-            text-align: center;
-        }
-
-        /* Optional: Adjust h1 and h2 sizes for emphasis */
-        h1 {
-            font-size: 36px; /* Larger font for h1 */
-        }
-
-        h2 {
-            font-size: 28px; /* Slightly smaller for h2 */
-        }
     </style>
 </head>
 <body>

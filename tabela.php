@@ -106,6 +106,9 @@ try {
     <title>Tabels</title></head>
 <br><br>
     <body>
+    <link rel="stylesheet" href="includes/tableStyle.css">
+    <link rel="stylesheet" href="includes/headerStyle.css">
+
     <?php
     // Display the standings
     echo "<table border='1' cellspacing='0' cellpadding='5' style='background-color: #fff;'>";

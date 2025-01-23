@@ -15,19 +15,28 @@
     }
 
     .team-table table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 10px;
+        background-color: #fff; /* White background for the table */
+        margin: 0 auto; /* Centers the table horizontally */
+        border-collapse: collapse; /* Ensures borders between table cells collapse into a single border */
+        width: 90%; /* Adjust the width to control the table's size */
+
     }
 
-    .team-table table th, .team-table table td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
+    .team-table table th{
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for table headers */
+        color: white; /* Text color */
+        padding: 10px; /* Adds space inside headers */
     }
 
-    .team-table table th {
-        background-color: #f4f4f4;
+
+    .team-table table td {
+        padding: 10px; /* Adds padding inside table cells */
+        text-align: center; /* Centers the text inside table cells */
+        border: 1px solid #ddd; /* Adds a light border around each cell */
+    }
+
+    tr:hover {
+        background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
     }
 
 </style>

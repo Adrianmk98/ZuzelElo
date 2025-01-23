@@ -54,35 +54,10 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="includes/tableStyle.css">
+    <link rel="stylesheet" href="includes/headerStyle.css">
 <style>
     body { font-family: Arial, sans-serif;  margin: 0; padding: 20px; }
-    h1, h2 { color: #333; }
-    /* Table styling */
-    table {
-        background-color: #fff; /* White background for the table */
-        margin: 0 auto; /* Centers the table horizontally */
-        border-collapse: collapse; /* Ensures borders between table cells collapse into a single border */
-        width: 80%; /* Adjust the width to control the table's size */
-    }
-
-    /* Optional: styling for table headers */
-    th {
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for table headers */
-        color: white; /* Text color */
-        padding: 10px; /* Adds space inside headers */
-    }
-
-    /* Optional: styling for table data */
-    td {
-        padding: 10px; /* Adds padding inside table cells */
-        text-align: center; /* Centers the text inside table cells */
-        border: 1px solid #ddd; /* Adds a light border around each cell */
-    }
-
-    /* Optional: styling for table rows (hover effect) */
-    tr:hover {
-        background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
-    }
     .match-header {
         background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
         color: white; /* Text color */

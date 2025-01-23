@@ -42,6 +42,10 @@ GROUP BY teamID";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
+    ?>
+    <link rel="stylesheet" href="includes/tableStyle.css">
+    <link rel="stylesheet" href="includes/headerStyle.css">
+<?php
     // Display results in an HTML table
     echo "<table border='1'>
             <tr>
@@ -70,33 +74,10 @@ if ($result->num_rows > 0) {
                 <td>" . $row['id7'] . "</td>
                 <td>" . $row['id8'] . "</td>
               </tr>";
-
-        // Prepare updates for futurematchroster
-        $updates[] = "UPDATE futurematchroster SET 
-            id1 = " . ($row['id1'] ?? 'NULL') . ", 
-            id2 = " . ($row['id2'] ?? 'NULL') . ", 
-            id3 = " . ($row['id3'] ?? 'NULL') . ", 
-            id4 = " . ($row['id4'] ?? 'NULL') . ", 
-            id5 = " . ($row['id5'] ?? 'NULL') . ", 
-            id6 = " . ($row['id6'] ?? 'NULL') . ", 
-            id7 = " . ($row['id7'] ?? 'NULL') . ", 
-            id8 = " . ($row['id8'] ?? 'NULL') . " 
-            WHERE teamID = " . $row['teamID'] . ";";
     }
+
     echo "</table>";
 
-    // Execute updates
-    foreach ($updates as $updateQuery) {
-        if ($conn->query($updateQuery) === TRUE) {
-            echo "Updated roster for team ID: " . $row['teamID'] . "<br>";
-        } else {
-            echo "Error updating team ID " . $row['teamID'] . ": " . $conn->error . "<br>";
-        }
-    }
-
-} else {
-    echo "No data found.";
 }
-
 $conn->close();
 ?>
