@@ -30,35 +30,52 @@ $conn->close();
             font-family: Arial, sans-serif;
 
         }
+        /* Table styling */
         table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
+            background-color: #fff; /* White background for the table */
+            margin: 0 auto; /* Centers the table horizontally */
+            border-collapse: collapse; /* Ensures borders between table cells collapse into a single border */
+            width: 80%; /* Adjust the width to control the table's size */
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-            background-color: #f4f4f4;
-        }
+
+        /* Optional: styling for table headers */
         th {
-            background-color: #f4f4f4;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for table headers */
+            color: white; /* Text color */
+            padding: 10px; /* Adds space inside headers */
+        }
+
+        /* Optional: styling for table data */
+        td {
+            padding: 10px; /* Adds padding inside table cells */
+            text-align: center; /* Centers the text inside table cells */
+            border: 1px solid #ddd; /* Adds a light border around each cell */
+        }
+
+        /* Optional: styling for table rows (hover effect) */
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
         }
         input {
             width: 90%;
             text-align: center;
         }
+        /* Button styling */
         button {
-            padding: 10px 20px;
-            margin: 5px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
+            margin: 0 auto; /* Centers the table horizontally */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            color: white; /* Text color */
+            padding: 15px 30px; /* Padding for better button size */
+            border-radius: 5px; /* Rounded corners */
+            font-size: 18px; /* Font size */
+            cursor: pointer; /* Adds pointer cursor on hover */
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Text shadow for contrast */
         }
         button:hover {
             background-color: #45a049;
         }
+
         .podium {
             display: flex;
             justify-content: center;
@@ -130,6 +147,8 @@ function updatePlayerDetails(playerId, playerIndex) {
 <h1>Elo Simulator</h1>
     <form method="post">
         <h1>Player Elo Ratings</h1>
+        <div style="text-align: center;"><button type="submit" name="simulate">Simulate Race</button></div>
+        <br><br>
         <table>
             <tr>
                 <th>Player</th>
@@ -173,13 +192,13 @@ function updatePlayerDetails(playerId, playerIndex) {
             </tr>
         </table>
 
-        <button type="submit" name="simulate">Simulate Race</button>
+
     </form>
 
     <?php
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        
-        
+
+
         // Collect player names based on dropdown selection
 $playerNames = [];
 for ($i = 1; $i <= 4; $i++) {
@@ -190,7 +209,7 @@ for ($i = 1; $i <= 4; $i++) {
             return $player['PlayerID'] == $selectedPlayerId;
         });
         $selectedPlayer = array_values($selectedPlayer)[0] ?? null;
-        
+
         // Use the player's full name if found
         if ($selectedPlayer) {
             $playerNames[$i] = $selectedPlayer['FirstName'] . ' ' . $selectedPlayer['LastName'];
@@ -203,12 +222,12 @@ for ($i = 1; $i <= 4; $i++) {
     }
 }
 
-        
+
         // Helper functions
         function calculateWinProbabilities($ratings) {
     $probabilities = [];
     $totalProbability = 0;
-    
+
     // Calculate win probability for each player based on Elo relative to others
     for ($i = 1; $i <= 4; $i++) {
         if ($ratings[$i] !== null) {
@@ -235,7 +254,7 @@ function calculateRankedProbabilities($ratings) {
     $n = count($ratings);
     $players = array_keys($ratings);
     $pairwiseProbabilities = [];
-    
+
     // Calculate pairwise probabilities
     foreach ($ratings as $playerA => $ratingA) {
         foreach ($ratings as $playerB => $ratingB) {
@@ -246,33 +265,33 @@ function calculateRankedProbabilities($ratings) {
             }
         }
     }
-    
+
     // Generate all permutations of players
     $permutations = generatePermutations($players);
     $positionProbabilities = [];
-    
+
     // Initialize probabilities
     foreach ($players as $player) {
         $positionProbabilities[$player] = array_fill(0, $n, 0);
     }
-    
+
     // Calculate probabilities for each permutation
     foreach ($permutations as $permutation) {
         $probability = 1;
-        
+
         // Calculate the probability of this specific permutation
         for ($i = 0; $i < $n; $i++) {
             for ($j = $i + 1; $j < $n; $j++) {
                 $probability *= $pairwiseProbabilities[$permutation[$i]][$permutation[$j]];
             }
         }
-        
+
         // Add the probability to the corresponding position for each player
         for ($i = 0; $i < $n; $i++) {
             $positionProbabilities[$permutation[$i]][$i] += $probability;
         }
     }
-    
+
     // Normalize probabilities for each player
     foreach ($positionProbabilities as $player => &$probabilities) {
         $total = array_sum($probabilities);
@@ -282,7 +301,7 @@ function calculateRankedProbabilities($ratings) {
             }, $probabilities);
         }
     }
-    
+
     return $positionProbabilities;
 }
 
@@ -353,7 +372,7 @@ $order=[];
         $outcomes = [];
         if (isset($_POST['simulate'])) {
     // Simulate race and calculate probabilities
-    $outcomes = simulateRace($ratings);  
+    $outcomes = simulateRace($ratings);
     $probabilities = calculateRankedProbabilities($ratings);
 
     // Define the points system
@@ -394,7 +413,7 @@ $i=1;
         $player = $data['player'];
         $probabilities = $data['probabilities'];
         $expectedPoints = $data['expectedPoints'];
-        
+
 
         //🟥 🟦 ⬜ 🟨
         if ($i == 1) {
@@ -421,19 +440,10 @@ $i=1;
               $i++;
     }
     echo "</table>";
-    
+
 }
  else {
-    // If results are manually entered
-    for ($i = 1; $i <= 4; $i++) {
-        if (isset($_POST["place_$i"]) && $_POST["place_$i"] !== '') {
-            // Store the manually entered player number in the outcomes array
-            $player = intval($_POST["place_$i"]);
-            if (isset($ratings[$player])) {
-                $outcomes[] = $player;
-            }
-        }
-    }
+     exit;
 }
 
 
@@ -441,24 +451,101 @@ $i=1;
 
         // Validate and calculate Elo
         if (count($outcomes) === 4) {
+            // Update ratings based on the outcomes
             [$ratings, $eloChanges] = updateRatings($ratings, $outcomes);
 
-
-
-            // Podium display
-echo "<h2 style='text-align: center;'>Podium</h2>";
-echo "<div class='podium'>";
-echo "<div class='place place-2'>2nd<br>" . $playerNames[$outcomes[1]] . "</div>"; // 2nd place
-echo "<div class='place place-1'>1st<br>" . $playerNames[$outcomes[0]] . "</div>"; // 1st place (center)
-echo "<div class='place place-3'>3rd<br>" . $playerNames[$outcomes[2]] . "</div>"; // 3rd place
-echo "</div>";
-
-
-            echo "</div>";
+            // Display the podium in a separate block
+            displayPodium($outcomes, $playerNames,$playerData);
         } else {
             echo "<p>Please provide valid results for the race or simulate one.</p>";
         }
+
+// Function to display podium
+
+
     }
+    // Function to display podium
+    function displayPodium($outcomes, $playerNames, $playerData) {
+        echo "<h2 style='text-align: center;'>Podium</h2>";
+        echo "<div class='podium'>";
+
+        // Merge the data
+        $mergedData = [];
+
+        foreach ($playerData as $player) {
+            // Get player ID
+            $playerId = $player['player'];
+
+            // Get player name based on the ID (adjust indexing if needed)
+            $playerName = isset($playerNames[$playerId]) ? $playerNames[$playerId] : null;
+
+            // Merge the data
+            $mergedData[] = [
+                'player' => $playerId,
+                'name' => $playerName,
+                'probabilities' => $player['probabilities'],
+                'expectedPoints' => $player['expectedPoints']
+            ];
+        }
+
+        // Generate a random podium based on probabilities
+        $randomizedOutcomes = simulateRaceBasedOnProbabilities($mergedData);
+
+        // Ensure $randomizedOutcomes has at least 4 entries
+        $randomizedOutcomes = array_pad($randomizedOutcomes, 4, null);
+
+        // Display positions in order
+        echo "<div class='place place-2'>2nd<br>" . htmlspecialchars($mergedData[$randomizedOutcomes[1]]['name'] ?? 'Unknown Player') . "</div>"; // 2nd place
+        echo "<div class='place place-1'>1st<br>" . htmlspecialchars($mergedData[$randomizedOutcomes[0]]['name'] ?? 'Unknown Player') . "</div>"; // 1st place (center)
+        echo "<div class='place place-3'>3rd<br>" . htmlspecialchars($mergedData[$randomizedOutcomes[2]]['name'] ?? 'Unknown Player') . "</div>"; // 3rd place
+
+        // Check if the index exists and is valid for 4th place
+        echo "<div class='place place-4'>4th<br>" . htmlspecialchars($mergedData[$randomizedOutcomes[3]]['name'] ?? 'Unknown Player') . "</div>"; // 4th place
+
+        echo "</div><br>";
+    }
+
+
+    // Function to simulate the race based on probabilities
+    // Function to simulate the race based on probabilities
+    function simulateRaceBasedOnProbabilities($mergedData) {
+        $randomizedOutcomes = [-1, -1, -1, -1]; // Initialize with invalid values (-1)
+
+        // Iterate over each player and determine position based on their probabilities
+        foreach ($mergedData as $index => $player) {
+            $probabilities = $player['probabilities'];
+            $randomValue = mt_rand() / mt_getrandmax(); // Generates a random number between 0 and 1
+
+            $totalProb = 0;
+            $assignedPosition = -1;
+
+            // Determine the position based on the random value and probability ranges
+            foreach ($probabilities as $pos => $prob) {
+                $totalProb += $prob;
+                if ($randomValue <= $totalProb) {
+                    $assignedPosition = $pos;
+                    break;
+                }
+            }
+
+            // Check if the assigned position is already taken
+            if ($assignedPosition !== -1 && $randomizedOutcomes[$assignedPosition] === -1) {
+                // Assign the position to the player
+                $randomizedOutcomes[$assignedPosition] = $index;
+            } else {
+                // If the position is taken, find the next available position
+                for ($i = 0; $i < count($randomizedOutcomes); $i++) {
+                    if ($randomizedOutcomes[$i] === -1) {
+                        $randomizedOutcomes[$i] = $index;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $randomizedOutcomes;
+    }
+
     ?>
 </body>
 </html>
