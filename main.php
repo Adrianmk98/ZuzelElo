@@ -17,7 +17,6 @@ if ($result->num_rows > 0) {
     exit; // Stop further execution if no players exist
 }
 
-$conn->close();
 
 // Randomly select 4 players
 if (count($players) >= 4) {
@@ -132,7 +131,72 @@ if (count($players) >= 4) {
         echo "<td>" . round($expectedPoints, 2) . "</td>";
         echo "</tr>";
     }
+    echo "</table>";
+
+    // Fetch a random row to get its matchID and heatNumber
+    $randomRowQuery = "SELECT `matchID`, `heatNumber` FROM `heatinformation` ORDER BY RAND() LIMIT 1";
+    $result = $conn->query($randomRowQuery);
+
+    if ($result->num_rows > 0) {
+        // Get the random matchID and heatNumber
+        $row = $result->fetch_assoc();
+        $matchID = $row['matchID'];
+        $heatNumber = $row['heatNumber'];
+
+        // Fetch all rows with the same matchID and heatNumber
+        $dataQuery = "
+    SELECT h.`raceID`, h.`matchID`, h.`heatNumber`, h.`startingpositionID`, p.`playerID` as playerID,p.`FirstName` as FirstName,p.`LastName` as LastName, h.`Score`, 
+           h.`bonus`, h.`Status`, t.`teamName` AS TeamName, h.`winChance`, 
+           h.`projectedPoints`
+    FROM `heatinformation` h
+    LEFT JOIN `team` t ON h.`currentplayerteamID` = t.`teamID`
+    LEFT JOIN `player` p on h.`playerID`=p.`playerID`
+    WHERE h.`matchID` = $matchID AND h.`heatNumber` = $heatNumber";
+
+
+        $dataResult = $conn->query($dataQuery);
+
+        if ($dataResult->num_rows > 0) {
+
+            // Display the data in an HTML table
+            ?>
+    <?php
+            echo "<h2>Match Number: $matchID<br>
+Heat Number: $heatNumber</h2>";
+            echo "<table border='1'>
+                <tr>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th>Score</th>
+                    <th>Win Chance</th>
+                    <th>Projected Points</th>
+                </tr>";
+
+            while ($dataRow = $dataResult->fetch_assoc()) {
+                ?><tr>
+                    <td><a href="profile.php?id=<?php echo $dataRow['playerID']; ?>">
+    <?php echo $dataRow['FirstName'] . ' ' . $dataRow['LastName']; ?></a></td>
+        <?php
+                    echo"<td>{$dataRow['TeamName']}</td>";
+                if($dataRow['bonus'] ==1) {
+                    echo "<td>".$dataRow['Score'].'+1'."</td>";
+                }else{
+                    echo "<td>".$dataRow['Score']."</td>";
+                }
+                echo"
+                    
+                    <td>{$dataRow['winChance']}%</td>
+                    <td>{$dataRow['projectedPoints']}</td>
+                </tr>";
+            }
+
+            echo "</table>";
+        } else {
+            echo "No data found for the selected raceID.";
+        }
+    } else {
+        echo "No raceID found.";
+    }
     ?>
-</table>
 </body>
 </html>

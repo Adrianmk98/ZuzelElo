@@ -1,0 +1,113 @@
+body {
+    font-family: Arial, sans-serif;
+}
+.team-select, .slot {
+    margin-bottom: 10px;
+}
+.slot select {
+    width: 200px;
+}
+
+.team-select {
+    margin-bottom: 20px;
+}
+.roster-form {
+    display: flex; /* Makes form elements align horizontally */
+    gap: 20px; /* Adds space between form elements */
+    justify-content: center; /* Centers the form content */
+    flex-wrap: wrap; /* Allows wrapping if necessary on smaller screens */
+}
+.slot {
+    width: 45%;
+}
+.team-section {
+    margin-bottom: 30px;
+}
+/* Styling for form container */
+form {
+    display: flex; /* Makes form elements align horizontally */
+    gap: 20px; /* Adds space between form elements */
+    justify-content: center; /* Centers the form content */
+    flex-wrap: wrap; /* Allows wrapping if necessary on smaller screens */
+}
+
+/* Styling for each team select container */
+.team-select {
+    display: flex; /* Aligns label and select side by side */
+    align-items: center; /* Vertically centers content */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    padding: 10px 20px; /* Padding for better spacing */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Styling for labels */
+.team-select label {
+    color: white; /* Text color */
+    padding-right: 10px; /* Adds space between label and select box */
+    font-size: 16px; /* Sets a consistent font size */
+}
+
+/* Styling for select dropdowns */
+.team-select select {
+    padding: 10px; /* Padding inside the select box */
+    font-size: 16px; /* Ensures font size consistency */
+    border-radius: 5px; /* Rounded corners */
+    border: none; /* Removes default border */
+}
+
+/* Button styling */
+body .matchSim-button {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    color: white; /* Text color */
+    padding: 15px 30px; /* Padding for better button size */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 18px; /* Font size */
+    cursor: pointer; /* Adds pointer cursor on hover */
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Text shadow for contrast */
+}
+
+body .matchSim-button:hover {
+    background-color: rgba(0, 0, 0, 0.7); /* Darkens background on hover */
+}
+.dropbtn {
+    font-size: 17px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 14px 16px;
+    background-color: inherit;
+    font-family: inherit;
+    margin: 0;
+    text-align: center;
+}
+
+.roster-form h3 {
+    width: 100%;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+/* Slot container styling */
+.slot-container {
+    display: flex; /* Align items horizontally */
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    gap: 20px; /* Add space between the slot items */
+    justify-content: center; /* Center the content horizontally */
+}
+
+/* Styling for each slot within the container */
+.slot-container .slot {
+    width: 48%; /* Set the width of each slot item */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    padding: 15px; /* Add padding for spacing */
+    border-radius: 5px; /* Rounded corners */
+    color: white; /* Text color */
+    font-size: 16px; /* Font size for consistency */
+    text-align: center; /* Center the content */
+    box-sizing: border-box; /* Ensure padding doesn't affect the width */
+}
+
+/* Styling for slot hover effect */
+.slot-container .slot:hover {
+    background-color: rgba(0, 0, 0, 0.7); /* Darkens the background on hover */
+}

@@ -1,4 +1,4 @@
-h1, h2 {
+h1, h2,h3,h4 {
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
     color: white; /* Text color */
     padding: 15px 30px; /* Adds more space for headers */

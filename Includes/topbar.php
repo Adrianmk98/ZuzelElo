@@ -1,73 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, Helvetica, sans-serif;
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-        body {
-            background-image: url('Includes/background.jpg'); /* Path to your image */
-            background-size: cover; /* Ensures the image covers the full page */
-            background-position: center; /* Centers the image */
-            background-attachment: fixed; /* Fixes the background when scrolling */
-        }
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
 
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw; /* Ensures full width */
-            height: 100vh; /* Ensures full height */
-            z-index: -1; /* Ensures the overlay is behind other content */
+    body {
+        background-image: url('Includes/background.jpg'); /* Path to your image */
+        background-size: cover; /* Ensures the image covers the full page */
+        background-position: center; /* Centers the image */
+        background-attachment: fixed; /* Fixes the background when scrolling */
+    }
 
-        }
+    .topnav {
+        overflow: hidden;
+        background-color: #333;
+    }
 
-        .topnav {
-            overflow: hidden;
-            background-color: #333;
-            position: fixed; /* Fixes the topnav to the top */
-            top: 0;
-            left: 0;
-            width: 100%; /* Ensures it spans the full width */
-            z-index: 1000; /* Ensures it's above other elements */
-        }
+    .topnav a {
+        float: left;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+    }
 
-        .topnav a {
-            float: left;
-            color: #f2f2f2;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-            font-size: 17px;
-        }
+    .topnav a:hover, .dropdown:hover .dropbtn {
+        background-color: #ddd;
+        color: black;
+    }
 
-        .topnav a:hover {
-            background-color: #ddd;
-            color: black;
-        }
+    .topnav a.active {
+        background-color: #4CAF50;
+        color: white;
+    }
 
-        .topnav a.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-    </style>
-</head>
+
+
+    .navbar a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+    }
+
+    .navbar a.active {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .dropdown {
+        float: left;
+        overflow: hidden;
+    }
+
+    .dropdown .dropbtn {
+        font-size: 17px;
+        border: none;
+        outline: none;
+        color: white;
+        padding: 14px 16px;
+        background-color: inherit;
+        font-family: inherit;
+        margin: 0;
+        text-align: center;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+    .dropdown-content a {
+        float: none;
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        text-align: left;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #ddd;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+
+    }
+
+
+</style>
 <body>
 <div class="topnav">
     <a class="active" href="main.php">Home</a>
     <a href="matches.php">Matches</a>
-    <a href="elochecker.php">Race Simulator</a>
+
+    <div class="dropdown">
+        <button class="dropbtn">Simulation
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="matchSimulator.php" >Match Simulator</a>
+            <a href="raceSimulator.php" >Race Simulator</a>
+
+        </div>
+    </div>
     <a href="freeAgents.php">Free Agents</a>
-    <a href="leagueplayers.php">Teams</a>
-    <a href="futurematchLoad.php">Match Simulator</a>
+
+
+    <a href="teams.php">Teams</a>
     <a href="tabela.php">Standings</a>
+
+    </a>
 </div>
-</body>
-<br><br>
-</html>

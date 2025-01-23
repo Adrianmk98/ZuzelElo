@@ -68,7 +68,7 @@ try {
     <link rel="stylesheet" href="includes/tableStyle.css">
     <link rel="stylesheet" href="includes/headerStyle.css">
 <style>
-    body { font-family: Arial, sans-serif;  margin: 0; padding: 20px; }
+    body { font-family: Arial, sans-serif;  margin: 0;  }
     .match-header {
         background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
         color: white; /* Text color */
@@ -101,34 +101,43 @@ foreach ($matchesByWeek as $weekHeader => $matches) {
           </tr>";
     foreach ($matches as $row) {
         echo "<tr>";
-        echo "<td><a href='matchprofile.php?match={$row['matchID']}'>{$row['matchID']}</a></td>";
+
+        // Check if information exists in the heatInformation table for this matchID
+        $matchID = $row['matchID'];
+        $heatInfoQuery = "
+        SELECT COUNT(*) 
+        FROM heatinformation 
+        WHERE matchID = :matchID
+    ";
+        $heatInfoStmt = $pdo->prepare($heatInfoQuery);
+        $heatInfoStmt->execute(['matchID' => $matchID]);
+        $heatInfoExists = $heatInfoStmt->fetchColumn();
+
+        if ($heatInfoExists > 0) {
+            // If records exist, link to matchprofile.php
+            echo "<td><a href='matchprofile.php?match={$matchID}'>{$matchID}</a></td>";
+        } else {
+            // If no records exist, link to futurematchprofile.php
+            echo "<td><a href='futurematchprofile.php?match={$matchID}'>$matchID</a></td>";
+        }
+
         echo "<td>{$row['homeTeamName']}</td>";
-        if(isset ($row['homeTeamScore']))
-        {
+        if (isset($row['homeTeamScore'])) {
             echo "<td>".$row['homeTeamScore']."(".$row['homeTeamProjectedScore'].")"."</td>";
-        }else{
+        } else {
             echo "<td>0</td>";
         }
-        echo "<td>{$row['awayTeamName']}</td>";
-        if(isset ($row['awayTeamScore']))
-        {
-            echo "<td>".$row['awayTeamScore']."(".$row['awayTeamProjectedScore'].")"."</td>";
-            if ($row['awayTeamScore'] - $row['awayTeamProjectedScore'] < 1 && $row['awayTeamScore'] - $row['awayTeamProjectedScore'] > -1) {
-                $counterin1++;
-            }
-            if ($row['awayTeamScore'] - $row['awayTeamProjectedScore'] < 2 && $row['awayTeamScore'] - $row['awayTeamProjectedScore'] > -2) {
-                $counterin2++;
-            }
 
-        }else{
+        echo "<td>{$row['awayTeamName']}</td>";
+        if (isset($row['awayTeamScore'])) {
+            echo "<td>".$row['awayTeamScore']."(".$row['awayTeamProjectedScore'].")"."</td>";
+        } else {
             echo "<td>0</td>";
         }
         echo "</tr>";
-        if($row['awayTeamProjectedScore']>45 && $row['awayTeamScore']<$row['homeTeamScore'] || $row['homeTeamProjectedScore']>45 && $row['homeTeamScore']<$row['awayTeamScore'])
-        {$wrongwinner++;
-        //echo "WRONGWINNER DETECTED";
-            }
     }
+
+
     echo "</table>";
 
 }

@@ -331,6 +331,7 @@ if ($result_team->num_rows > 0) {
                 <th>Score</th>
                 <th>Bonus</th>
                 <th>Races</th>
+                <th>Avg</th>
                 <th>PPA</th>
             </tr>
             </thead>
@@ -346,6 +347,13 @@ if ($result_team->num_rows > 0) {
                     <td><?php echo htmlspecialchars($row['Score']); ?></td>
                     <td><?php echo htmlspecialchars($row['Bonus']); ?></td>
                     <td><?php echo htmlspecialchars($row['TotalRaces']); ?></td>
+                    <td>
+                        <?php
+                        echo $row['TotalRaces'] > 0
+                            ? round((($row['Bonus'] + $row['Score']) / $row['TotalRaces']), 2)
+                            : 'N/A';
+                        ?>
+                    </td>
                     <td><?php echo htmlspecialchars($row['TotalPPA']); ?></td>
                 </tr>
             <?php endwhile; ?>
