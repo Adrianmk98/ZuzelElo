@@ -6,6 +6,16 @@ try {
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8mb4", $dbusername, $dbpassword);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Check if 'year' parameter exists in the URL
+    if (!isset($_GET['year']) || empty($_GET['year'])) {
+        // Redirect to the matches.php page with the current year
+        header('Location: matches.php?year=' . date('Y'));
+        exit; // Always exit after a header redirect
+    }
+
+// Sanitize and retrieve the year parameter
+    $yearID = intval($_GET['year']);
+
     // Query to get match details
     $match_details_query = "
     SELECT 
