@@ -69,8 +69,18 @@
     // Generate tables for each team
     foreach ($playersByTeam as $teamName => $players) {
         $teamID = $players[0]['teamID'];
-        echo "<div class='team-table'>";
-        echo "<h2>" . htmlspecialchars($teamName) . " (" . $cumulativeSingleTeamPoints[$teamID] .")</h2>";
+        $teamClass = '';
+        $teamPrefix = '';  // Variable to hold prefix for team name
+        if ($teamID == $hometeamID) {
+            $teamClass = 'home-team'; // Class for home team
+            $teamPrefix = 'H-';       // Prefix for home team
+        } elseif ($teamID == $awayteamID) {
+            $teamClass = 'away-team'; // Class for away team
+            $teamPrefix = 'A-';       // Prefix for away team
+        }
+
+        echo "<div class='team-table $teamClass'>";  // Add home-team or away-team class
+        echo "<h2>" . htmlspecialchars($teamPrefix . $teamName) . " (" . $cumulativeSingleTeamPoints[$teamID] .")</h2>";
         echo "<table>
         <thead>
         <tr>
