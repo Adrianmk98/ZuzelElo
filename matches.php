@@ -49,13 +49,40 @@ try {
     die("Error connecting to the database: " . $e->getMessage());
 }
 ?>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
+    body { font-family: Arial, sans-serif;  margin: 0; padding: 20px; }
     h1, h2 { color: #333; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    table th, table td { border: 1px solid #ddd; padding: 10px; text-align: center; background-color: #f4f4f4; }
-    table th { background-color: #f4f4f4; }
+    /* Table styling */
+    table {
+        background-color: #fff; /* White background for the table */
+        margin: 0 auto; /* Centers the table horizontally */
+        border-collapse: collapse; /* Ensures borders between table cells collapse into a single border */
+        width: 80%; /* Adjust the width to control the table's size */
+    }
+
+    /* Optional: styling for table headers */
+    th {
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for table headers */
+        color: white; /* Text color */
+        padding: 10px; /* Adds space inside headers */
+    }
+
+    /* Optional: styling for table data */
+    td {
+        padding: 10px; /* Adds padding inside table cells */
+        text-align: center; /* Centers the text inside table cells */
+        border: 1px solid #ddd; /* Adds a light border around each cell */
+    }
+
+    /* Optional: styling for table rows (hover effect) */
+    tr:hover {
+        background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
+    }
     .match-header {
         background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
         color: white; /* Text color */
@@ -69,13 +96,15 @@ try {
 
     .heat-table { margin-bottom: 40px; }
 </style>
+</head>
+<body>
 <?php
 $counterin1=0;
 $counterin2=0;
 $wrongwinner=0;
 // Display matches grouped by week
 foreach ($matchesByWeek as $weekHeader => $matches) {
-    echo "<div class='match-header'><strong>$weekHeader</strong></div>";
+    echo "<div class='match-header'><strong>$weekHeader</strong></div><br>";
     echo "<table class='heat-table'>";
     echo "<tr>
             <th>Match ID</th>
@@ -122,4 +151,5 @@ foreach ($matchesByWeek as $weekHeader => $matches) {
 //echo "Wrong Winner: ".$wrongwinner;
 ?>
 
-
+</body>
+</html>
