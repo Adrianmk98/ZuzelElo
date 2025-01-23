@@ -1,0 +1,25 @@
+table {
+    background-color: #fff; /* White background for the table */
+    margin: 0 auto; /* Centers the table horizontally */
+    border-collapse: collapse; /* Ensures borders between table cells collapse into a single border */
+    width: 80%; /* Adjust the width to control the table's size */
+}
+
+/* Optional: styling for table headers */
+th {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for table headers */
+    color: white; /* Text color */
+    padding: 10px; /* Adds space inside headers */
+}
+
+/* Optional: styling for table data */
+td {
+    padding: 10px; /* Adds padding inside table cells */
+    text-align: center; /* Centers the text inside table cells */
+    border: 1px solid #ddd; /* Adds a light border around each cell */
+}
+
+/* Optional: styling for table rows (hover effect) */
+tr:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
+}
