@@ -1,19 +1,17 @@
 <?php
-// Database connection
-$host = 'localhost';  // Database host
-$dbname = 'zuzelelo'; // Database name
-$username = 'root';    // Database username
-$password = '';        // Database password
-
+include 'includes/sqlCall.php';
+include 'includes/topbar.php';
 
 try {
     // Connect to the database
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $dbusername, $dbpassword);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
     exit;
 }
+
+ob_start();
 
 // Fetch teams from the database
 $stmt = $pdo->query("SELECT teamID, teamName FROM team");
@@ -45,39 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['roster']) && !empty($_POST['roster'])) {
         $roster = $_POST['roster'];
 
-       // echo "<h3>Roster Created:</h3>";
-        //echo "<table border='1'>";
-       // echo "<tr><th>Slot</th><th>Player</th><th>Elo</th></tr>";
+
 
         foreach ($roster as $slot => $player_id) {
             $player_stmt = $pdo->prepare("SELECT FirstName, lastName, Elo, teamID FROM player WHERE PlayerID = ?");
             $player_stmt->execute([$player_id]);
             $player = $player_stmt->fetch(PDO::FETCH_ASSOC);
-            //echo "<tr><td>$slot</td><td>" . $player['FirstName'] . " " . $player['lastName'] . "</td><td>" . $player['Elo'] . "</td></tr>";
+
         }
-        //echo "</table>";
 
-        // Sort players by Elo score in descending order
-     //   usort($players_team_1, function ($a, $b) {
-        //    return $b['Elo'] - $a['Elo']; // Compare Elo scores in descending order
-        //});
-//
-      //  usort($players_team_2, function ($a, $b) {
-        //    return $b['Elo'] - $a['Elo']; // Compare Elo scores in descending order
-       // });
-
-// Assign the top 4 players from each team to Heat 14 and 15
-        //$numberA1 = $players_team_1[0]['PlayerID'];
-        //$numberA2 = $players_team_1[1]['PlayerID'];
-        //$numberA3 = $players_team_1[2]['PlayerID'];
-        //$numberA4 = $players_team_1[3]['PlayerID'];
-
-        //$numberB1 = $players_team_2[0]['PlayerID'];
-        //$numberB2 = $players_team_2[1]['PlayerID'];
-        //$numberB3 = $players_team_2[2]['PlayerID'];
-        //$numberB4 = $players_team_2[3]['PlayerID'];
-
-        // Match number map (heat slots corresponding to players)
         $matchNumberMap = [
             1 => [ // Heat 1
                 1 => $roster[1], // Slot 1
@@ -157,18 +131,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 3 => $roster[13],
                 4 => $roster[3],
             ],
-            14 => [ // Heat 13
-                1 => $roster[2],
-                2 => $roster[10],
-                3 => $roster[3],
-                4 => $roster[11],
-            ],
-            15 => [ // Heat 15
-                1 => $roster[1],
-                2 => $roster[9],
-                3 => $roster[5],
-                4 => $roster[13],
-            ],
 
 
         ];
@@ -193,12 +155,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Loop through each heat and run the Monte Carlo simulation
         include 'winprobabiltycalculator.php';  // Include the simulation function
 
-// Display the match number map with player assignments
-        echo "<h3>Match Number Map:</h3>";
+        $updatedMatchNumberMap = false;
 
-        foreach ($matchNumberMap as $heat => $slots) {
-            echo "<h4>Heat $heat:</h4>";
-            echo "<table border='1'>";
+        foreach ($matchNumberMap as $heat => &$slots) {
+            echo "<h2>Heat $heat:</h2>";
+            echo "<table border='1' style='background-color: #fff;'>";
             echo "<tr><th>Slot</th><th>Player</th><th>Projected Points</th><th>Win Chance</th><th>2nd Place Probability</th><th>3rd Place Probability</th><th>4th Place Probability</th><th>Simulated Points</th></tr>";
 
             // Get Elo ratings for players in this heat
@@ -210,6 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Collect player IDs and Elo ratings, and reset team points
             foreach ($slots as $slot => $playerID) {
+
+
+
+
                 $player_stmt = $pdo->prepare("SELECT Elo, teamID FROM player WHERE PlayerID = ?");
                 $player_stmt->execute([$playerID]);
                 $player = $player_stmt->fetch(PDO::FETCH_ASSOC);
@@ -235,8 +200,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Calculate total points for each team and update cumulative points
             foreach ($slots as $slot => $playerID) {
+
+                // Check if playerID exists in results
+                if (!isset($results[$playerID])) {
+                    echo "Player ID $playerID not found in results!<br>";
+                    continue;  // Skip this iteration if the player ID is not found in results
+                }
+
+                // Now you can safely access $results[$playerID]
                 $playerResults = $results[$playerID];
-                $singlePlayerResults=$single_results[$playerID];
+                $singlePlayerResults = $single_results[$playerID];
 
                 $player_stmt = $pdo->prepare("
     SELECT p.PlayerID, p.FirstName, p.lastName, t.teamName 
@@ -256,8 +229,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $teamPoints[$teamID] += $playerResults['projected_points'];
                 $teamSinglePoints[$teamID]+=$singlePlayerResults['projected_points'];
 
-                // Display player results in the table
-                echo "<tr>";
+                // Check if the player has 3 projected points
+                $goldStyle = ($singlePlayerResults['projected_points'] == 3) ? "background: gold;" : "";
+
+                echo "<tr style='$goldStyle'>";
                 echo "<td>$slot</td>";
                 echo "<td>" . $player['FirstName'] . " " . $player['lastName'] . "</td>";
                 echo "<td>" . round($playerResults['projected_points'], 2) . "</td>";
@@ -265,8 +240,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<td>" . round($playerResults['finishing_probs'][1] * 100, 2) . "%</td>";
                 echo "<td>" . round($playerResults['finishing_probs'][2] * 100, 2) . "%</td>";
                 echo "<td>" . round($playerResults['finishing_probs'][3] * 100, 2) . "%</td>";
-                echo "<td>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
+
+// For the points column, keep the conditional formatting
+                if ($singlePlayerResults['projected_points'] == 3) {
+                    echo "<td style='background: gold'>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
+                } else {
+                    echo "<td>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
+                }
+
                 echo "</tr>";
+
                 // Initialize player data if not already set
                 if (!isset($playerPPOData[$playerID])) {
                     $playerPPOData[$playerID] = [
@@ -274,6 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'firstName' => $player['FirstName'],
                         'lastName' => $player['lastName'],
                         'teamName' => $player['teamName'],
+                        'teamID' => $teamID,
                         'Score' => 0,
                         'Bonus' => 0,
                         'projected_points' => 0,
@@ -286,6 +270,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $playerPPOData[$playerID]['Score'] += $singlePlayerResults['projected_points'];
                 $playerPPOData[$playerID]['ppo'] += $singlePlayerResults['projected_points']-$playerResults['projected_points'];
                 $ppoAdjustment = $playerPPOData[$playerID]['ppo'] ?? 0;
+                $playerPPOData[$playerID]['pointBreakdown'][] = (string)$singlePlayerResults['projected_points'];
+                // Now, update Heat 14 and Heat 15 outside the loop
+                if ($heat == 13) {
+                    // Organize players' scores by their teams
+                    $teamRankings = [
+                        $selected_team_1 => [],
+                        $selected_team_2 => []
+                    ];
+
+                    // Populate team scores from the cumulative player performance
+                    foreach ($playerPPOData as $pID => $data) {
+                        $teamID = $data['teamID'];
+                        if ($teamID == $selected_team_1 || $teamID == $selected_team_2) {
+                            $teamRankings[$teamID][$pID] = $data['Score'];
+                        }
+                    }
+
+                    // Sort players within each team by score (descending order)
+                    foreach ($teamRankings as &$teamPlayers) {
+                        arsort($teamPlayers); // Sort by score descending
+                    }
+
+                    // Get players for Heat 14 and Heat 15 based on sorted rankings
+                    $team1Players = array_keys($teamRankings[$selected_team_1]);
+                    $team2Players = array_keys($teamRankings[$selected_team_2]);
+
+                    // Assign slots for Heat 14 and Heat 15
+
+                    $matchNumberMap[14] = [
+                        1 => $team1Players[2], // Team 1, 3rd best
+                        2 => $team2Players[2], // Team 2, 3rd best
+                        3 => $team1Players[3], // Team 1, 4th best
+                        4 => $team2Players[3], // Team 2, 4th best
+                    ];
+
+                    $matchNumberMap[15] = [
+                        1 => $team2Players[0], // Team 2, best
+                        2 => $team1Players[0], // Team 1, best
+                        3 => $team2Players[1], // Team 2, 2nd best
+                        4 => $team1Players[1], // Team 1, 2nd best
+
+                    ];
+
+
+                }
 
 
 
@@ -293,23 +322,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "</table>";
 
 
-            // After the race, display the total projected points for each team
-            echo "<h4>Projected Points for Heat $heat:</h4>";
+            echo "<h4>Projected Points and Simulation for Heat $heat:</h4>";
+            // Create an array of team data including teamID, teamName, and cumulativeSingleTeamPoints
+            $teams = [];
+            foreach ($teamNames as $teamID => $teamName) {
+                $teams[] = [
+                    'teamID' => $teamID,
+                    'teamName' => $teamName,
+                    'cumulativeSingleTeamPoints' => $cumulativeSingleTeamPoints[$teamID] ?? 0
+                ];
+            }
+
+// Sort teams by cumulativeSingleTeamPoints in descending order
+            usort($teams, function($a, $b) {
+                return $b['cumulativeSingleTeamPoints'] <=> $a['cumulativeSingleTeamPoints'];
+            });
+
+// Display the table headers
             echo "<table border='1'>";
-            echo "<tr><th>Team</th><th>Current Heat Points</th><th>Cumulative Points</th> </tr>";
-            foreach ($teamPoints as $teamID => $teamPointsValue) {
-                echo "<tr><td>" . $teamNames[$teamID] . "</td><td>" . round($teamPointsValue, 2) . "</td><td>" . round(($cumulativeTeamPoints[$teamID] ?? 0) + $teamPointsValue, 2) . "</td></tr>";
+            echo "<tr><th>Projected Points</th><th>Total Projected Points</th><th>Team</th><th>Simulated Points</th><th>Total Simulated Points</th></tr>";
+
+// Loop through the sorted teams and display the data
+            foreach ($teams as $team) {
+                $teamID = $team['teamID'];
+                $teamName = $team['teamName'];
+
+                $currentCumulativePoints = round(($cumulativeTeamPoints[$teamID] ?? 0) + ($teamPoints[$teamID] ?? 0), 2);
+                $simulatedHeatPoints = round($teamSinglePoints[$teamID] ?? 0, 2);
+                $simulatedCumulativePoints = round(($cumulativeSingleTeamPoints[$teamID] ?? 0) + $simulatedHeatPoints, 2);
+
+                echo "<tr>       
+        <td>" . round($teamPoints[$teamID] ?? 0, 2) . "</td>
+        <td>" . $currentCumulativePoints . "</td>
+        <td>" . $teamName . "</td>
+        <td>" . $simulatedHeatPoints . "</td>
+        <td>" . $simulatedCumulativePoints . "</td>
+      </tr>";
             }
+
             echo "</table>";
 
-            // After the race, display the total projected points for each team
-            echo "<h4>Simulation for Heat $heat:</h4>";
-            echo "<table border='1'>";
-            echo "<tr><th>Team</th><th>Single Heat</th><th>Cumulative Total</th> </tr>";
-            foreach ($teamSinglePoints as $teamID => $teamSinglePointsValue) {
-                echo "<tr><td>" . $teamNames[$teamID] . "</td><td>" . round($teamSinglePointsValue, 2) . "</td><td>" . round(($cumulativeSingleTeamPoints[$teamID] ?? 0) + $teamSinglePointsValue, 2) . "</td></tr>";
-            }
-            echo "</table>";
+
 
             // Update cumulative team points for future heats
             foreach ($teamPoints as $teamID => $teamPointsValue) {
@@ -320,8 +373,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $cumulativeSingleTeamPoints[$teamID] = ($cumulativeSingleTeamPoints[$teamID] ?? 0) + $teamSinglePointsValue;
             }
         }
-        include 'FutureMatchPlayerPPOtable.php';
-?><button>Simulate</button><?php
+        //include 'FutureMatchPlayerPPOtable.php';
+        $content = ob_get_clean();
+        include 'futurematchTeamScoreBreakdownTable.php';
+        echo $content;
+?><?php
     }
 
 }
@@ -343,13 +399,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .slot select {
             width: 200px;
         }
+        /* Table styling */
+        table {
+            background-color: #fff; /* White background for the table */
+            margin: 0 auto; /* Centers the table horizontally */
+            border-collapse: collapse; /* Ensures borders between table cells collapse into a single border */
+            width: 80%; /* Adjust the width to control the table's size */
+        }
+
+        /* Optional: styling for table headers */
+        th {
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for table headers */
+            color: white; /* Text color */
+            padding: 10px; /* Adds space inside headers */
+        }
+
+        /* Optional: styling for table data */
+        td {
+            padding: 10px; /* Adds padding inside table cells */
+            text-align: center; /* Centers the text inside table cells */
+            border: 1px solid #ddd; /* Adds a light border around each cell */
+        }
+
+        /* Optional: styling for table rows (hover effect) */
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
+        }
+
         .team-select {
             margin-bottom: 20px;
         }
         .roster-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            display: flex; /* Makes form elements align horizontally */
+            gap: 20px; /* Adds space between form elements */
+            justify-content: center; /* Centers the form content */
+            flex-wrap: wrap; /* Allows wrapping if necessary on smaller screens */
         }
         .slot {
             width: 45%;
@@ -357,21 +441,100 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .team-section {
             margin-bottom: 30px;
         }
-        h2 {
-            margin-top: 20px;
+        h1, h2,h3,h4 {
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+            color: white; /* Text color */
+            padding: 15px 30px; /* Adds more space for headers */
+            border-radius: 5px; /* Optional: rounds the corners for a softer look */
+            font-size: inherit; /* Inherit the font size from the default styles for consistency */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds a shadow behind the text for better contrast */
+            text-align: center;
         }
+
+        /* Optional: Adjust h1 and h2 sizes for emphasis */
+        h1 {
+            font-size: 36px; /* Larger font for h1 */
+        }
+
+        h2 {
+            font-size: 28px; /* Slightly smaller for h2 */
+        }
+        /* Styling for form container */
+        form {
+            display: flex; /* Makes form elements align horizontally */
+            gap: 20px; /* Adds space between form elements */
+            justify-content: center; /* Centers the form content */
+            flex-wrap: wrap; /* Allows wrapping if necessary on smaller screens */
+        }
+
+        /* Styling for each team select container */
+        .team-select {
+            display: flex; /* Aligns label and select side by side */
+            align-items: center; /* Vertically centers content */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            padding: 10px 20px; /* Padding for better spacing */
+            border-radius: 5px; /* Rounded corners */
+        }
+
+        /* Styling for labels */
+        .team-select label {
+            color: white; /* Text color */
+            padding-right: 10px; /* Adds space between label and select box */
+            font-size: 16px; /* Sets a consistent font size */
+        }
+
+        /* Styling for select dropdowns */
+        .team-select select {
+            padding: 10px; /* Padding inside the select box */
+            font-size: 16px; /* Ensures font size consistency */
+            border-radius: 5px; /* Rounded corners */
+            border: none; /* Removes default border */
+        }
+
+        /* Button styling */
+        button {
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            color: white; /* Text color */
+            padding: 15px 30px; /* Padding for better button size */
+            border-radius: 5px; /* Rounded corners */
+            font-size: 18px; /* Font size */
+            cursor: pointer; /* Adds pointer cursor on hover */
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Text shadow for contrast */
+        }
+
+        button:hover {
+            background-color: rgba(0, 0, 0, 0.7); /* Darkens background on hover */
+        }
+
         .roster-form h3 {
             width: 100%;
             margin-bottom: 10px;
             font-size: 1.2em;
         }
+        /* Slot container styling */
         .slot-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: flex; /* Align items horizontally */
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+            gap: 20px; /* Add space between the slot items */
+            justify-content: center; /* Center the content horizontally */
         }
+
+        /* Styling for each slot within the container */
         .slot-container .slot {
-            width: 48%;
+            width: 48%; /* Set the width of each slot item */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            padding: 15px; /* Add padding for spacing */
+            border-radius: 5px; /* Rounded corners */
+            color: white; /* Text color */
+            font-size: 16px; /* Font size for consistency */
+            text-align: center; /* Center the content */
+            box-sizing: border-box; /* Ensure padding doesn't affect the width */
+        }
+
+        /* Styling for slot hover effect */
+        .slot-container .slot:hover {
+            background-color: rgba(0, 0, 0, 0.7); /* Darkens the background on hover */
         }
     </style>
 </head>
@@ -408,31 +571,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" name="team_1" value="<?= $selected_team_1 ?>">
             <input type="hidden" name="team_2" value="<?= $selected_team_2 ?>">
 
+            <?php
+            $future_roster_team_1 = [];
+            $future_roster_team_2 = [];
+
+            // Query for Team 1's roster
+            $sql_team1 = "SELECT id1, id2, id3, id4, id5, id6, id7, id8 FROM futurematchroster WHERE teamID = $selected_team_1";
+            $result_team1 = $conn->query($sql_team1);
+
+            if ($result_team1->num_rows > 0) {
+            $future_roster_team_1 = $result_team1->fetch_assoc();
+            }
+
+            // Query for Team 2's roster
+            $sql_team2 = "SELECT id1, id2, id3, id4, id5, id6, id7, id8 FROM futurematchroster WHERE teamID = $selected_team_2";
+            $result_team2 = $conn->query($sql_team2);
+
+            if ($result_team2->num_rows > 0) {
+            $future_roster_team_2 = $result_team2->fetch_assoc();
+            }
+
+            // Fetch players for the dropdown lists
+            function fetch_players($teamID, $conn) {
+            $sql = "SELECT PlayerID, FirstName, LastName FROM player WHERE teamID = $teamID ORDER BY Elo DESC";
+            $result = $conn->query($sql);
+            $players = [];
+            if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+            $players[] = $row;
+            }
+            }
+            return $players;
+            }
+
+            $players_team_1 = fetch_players($selected_team_1, $conn);
+            $players_team_2 = fetch_players($selected_team_2, $conn);
+
+            $conn->close();
+            ?>
+
             <div class="roster-form">
-                <h3>Team 1 (Slots 1-8)</h3>
+                <button type="submit">Simulate Match</button>
+                <h3>Home Team</h3>
                 <div class="slot-container">
                     <?php for ($i = 1; $i <= 8; $i++): ?>
                         <div class="slot">
                             <label for="slot<?= $i ?>">Slot <?= $i ?>:</label>
                             <select name="roster[<?= $i ?>]" id="slot<?= $i ?>" required>
                                 <option value="">--Select Player--</option>
-                                <?php foreach ($players_team_2 as $player): ?>
-                                    <option value="<?= $player['PlayerID'] ?>"><?= $player['FirstName'] . " " . $player['lastName'] ?></option>
+                                <?php foreach ($players_team_1 as $player): ?>
+                                    <option value="<?= $player['PlayerID'] ?>"
+                                        <?= isset($future_roster_team_1["id$i"]) && $future_roster_team_1["id$i"] == $player['PlayerID'] ? 'selected' : '' ?>>
+                                        <?= $player['FirstName'] . " " . $player['LastName'] ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                     <?php endfor; ?>
                 </div>
 
-                <h3>Team 2 (Slots 9-16)</h3>
+                <h3>Away Team</h3>
                 <div class="slot-container">
                     <?php for ($i = 9; $i <= 16; $i++): ?>
                         <div class="slot">
                             <label for="slot<?= $i ?>">Slot <?= $i ?>:</label>
                             <select name="roster[<?= $i ?>]" id="slot<?= $i ?>" required>
                                 <option value="">--Select Player--</option>
-                                <?php foreach ($players_team_1 as $player): ?>
-                                    <option value="<?= $player['PlayerID'] ?>"><?= $player['FirstName'] . " " . $player['lastName'] ?></option>
+                                <?php foreach ($players_team_2 as $player): ?>
+                                    <option value="<?= $player['PlayerID'] ?>"
+                                        <?= isset($future_roster_team_2["id" . ($i - 8)]) && $future_roster_team_2["id" . ($i - 8)] == $player['PlayerID'] ? 'selected' : '' ?>>
+                                        <?= $player['FirstName'] . " " . $player['LastName'] ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -440,7 +649,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <button type="submit">Create Roster</button>
+
         </form>
     <?php endif; ?>
 </body>
