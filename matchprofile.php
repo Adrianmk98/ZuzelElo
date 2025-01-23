@@ -216,13 +216,29 @@ endforeach;
         }
 
         h1, h2 {
-            color: #333;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+            color: white; /* Text color */
+            padding: 15px 30px; /* Adds more space for headers */
+            border-radius: 5px; /* Optional: rounds the corners for a softer look */
+            font-size: inherit; /* Inherit the font size from the default styles for consistency */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds a shadow behind the text for better contrast */
+            text-align: center;
+        }
+
+        /* Optional: Adjust h1 and h2 sizes for emphasis */
+        h1 {
+            font-size: 36px; /* Larger font for h1 */
+        }
+
+        h2 {
+            font-size: 28px; /* Slightly smaller for h2 */
         }
 
         table {
             border-collapse: collapse;
             width: 100%;
             margin-top: 20px;
+            background-color: #fff;
         }
 
         table th, table td {
