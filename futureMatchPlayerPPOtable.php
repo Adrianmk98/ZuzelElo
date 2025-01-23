@@ -3,7 +3,7 @@ usort($playerPPOData, function ($a, $b) {
     return $b['teamName'] <=> $a['teamName'];
 });
 ?>
-<h2>All Players Sorted by PPO</h2>
+<h2>All Players Sorted by Score</h2>
 <table border='1'>
     <thead>
     <tr>
