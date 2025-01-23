@@ -65,8 +65,8 @@
     <a href="elochecker.php">Race Simulator</a>
     <a href="freeAgents.php">Free Agents</a>
     <a href="leagueplayers.php">Teams</a>
+    <a href="futurematchLoad.php">Match Simulator</a>
     <a href="tabela.php">Standings</a>
-    <a href="#">Logout</a>
 </div>
 </body>
 <br><br>
