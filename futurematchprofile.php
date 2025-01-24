@@ -191,22 +191,46 @@ foreach ($roster as $slot => $player_id) {
         $playerIDs = [];
         $eloRatings = [];
         $teamPoints = [];  // Initialize an empty array to hold team points for this heat
-        $teamSinglePoints=[];
-        $playerteamIDs=[];
+        $teamSinglePoints = [];
+        $playerteamIDs = [];
 
         // Collect player IDs and Elo ratings, and reset team points
         foreach ($slots as $slot => $playerID) {
 
 
+            // Dynamically construct the SQL query to check weeks back to 1
+            $columns_to_check = [];
+            for ($i = $weeknum; $i > 0; $i--) {
+                $columns_to_check[] = "NULLIF(`$i`, 0)"; // Use NULLIF to treat 0 as null
+            }
+            $columns_to_check = implode(", ", $columns_to_check);
 
+            $elo_query = "
+    SELECT COALESCE(
+        " . $columns_to_check . ",
+        (SELECT Elo FROM player WHERE PlayerID = ?)
+    ) AS Elo 
+    FROM $elo_table 
+    WHERE PlayerID = ?
+    LIMIT 1
+";
 
-            $player_stmt = $pdo->prepare("SELECT Elo, teamID FROM player WHERE PlayerID = ?");
+            $elo_stmt = $pdo->prepare($elo_query);
+            $elo_stmt->execute([$playerID, $playerID]);
+            $elo_data = $elo_stmt->fetch(PDO::FETCH_ASSOC);
+
+// Get teamID from the player table
+            $player_stmt = $pdo->prepare("SELECT teamID FROM player WHERE PlayerID = ?");
             $player_stmt->execute([$playerID]);
             $player = $player_stmt->fetch(PDO::FETCH_ASSOC);
+
+// Use the fetched Elo and teamID
+            $eloRatings[] = $elo_data['Elo'];
             $playerIDs[] = $playerID;
-            $eloRatings[] = $player['Elo'];
             $teamID = $player['teamID'];
             array_push($playerteamIDs, $teamID);
+
+
 
             // Initialize team points for this team if not already initialized
             if (!isset($teamPoints[$teamID])) {
@@ -219,8 +243,8 @@ foreach ($roster as $slot => $player_id) {
 
 
         // Run the Monte Carlo simulation for this heat (with 1000 iterations and K=32)
-        $results = runFutureMonteCarloSimulation($playerIDs, $eloRatings,$playerteamIDs,$hometeamID, 1000, 32);
-        $single_results = runFutureSingleMonteCarloSimulation($playerIDs, $eloRatings,$playerteamIDs,$hometeamID, 1, 32);
+        $results = runFutureMonteCarloSimulation($playerIDs, $eloRatings, $playerteamIDs, $hometeamID, 1000, 32);
+        $single_results = runFutureSingleMonteCarloSimulation($playerIDs, $eloRatings, $playerteamIDs, $hometeamID, 1, 32);
 
 
         // Calculate total points for each team and update cumulative points
@@ -252,7 +276,7 @@ foreach ($roster as $slot => $player_id) {
 
             // Add the projected points for each player to their team's total
             $teamPoints[$teamID] += $playerResults['projected_points'];
-            $teamSinglePoints[$teamID]+=$singlePlayerResults['projected_points'];
+            $teamSinglePoints[$teamID] += $singlePlayerResults['projected_points'];
 
             // Check if the player has 3 projected points
             $goldStyle = ($singlePlayerResults['projected_points'] == 3) ? "background: gold;" : "";
@@ -269,6 +293,7 @@ foreach ($roster as $slot => $player_id) {
 // For the points column, keep the conditional formatting
             if ($singlePlayerResults['projected_points'] == 3) {
                 echo "<td style='background: gold'>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
+
             } else {
                 echo "<td>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
             }
@@ -287,15 +312,18 @@ foreach ($roster as $slot => $player_id) {
                     'Bonus' => 0,
                     'projected_points' => 0,
                     'ppo' => 0,
-                    'ppa'=>0,
+                    'ppa' => 0,
                     'pointBreakdown' => [], // Initialize an empty array ONCE
                 ];
             }
 
+            $playerPPOData[$playerID]['projected_points'] += $playerResults['projected_points'];
             $playerPPOData[$playerID]['Score'] += $singlePlayerResults['projected_points'];
-            $playerPPOData[$playerID]['ppo'] += $singlePlayerResults['projected_points']-$playerResults['projected_points'];
+            $playerPPOData[$playerID]['ppo'] += $singlePlayerResults['projected_points'] - $playerResults['projected_points'];
             $ppoAdjustment = $playerPPOData[$playerID]['ppo'] ?? 0;
             $playerPPOData[$playerID]['pointBreakdown'][] = (string)$singlePlayerResults['projected_points'];
+
+
             // Now, update Heat 14 and Heat 15 outside the loop
             if ($heat == 13) {
                 // Organize players' scores by their teams
@@ -308,7 +336,7 @@ foreach ($roster as $slot => $player_id) {
                 foreach ($playerPPOData as $pID => $data) {
                     $teamID = $data['teamID'];
                     if ($teamID == $hometeamID || $teamID == $awayteamID) {
-                        $teamRankings[$teamID][$pID] = $data['Score'];
+                        $teamRankings[$teamID][$pID] = $data['projected_points'];
                     }
                 }
 
@@ -342,7 +370,6 @@ foreach ($roster as $slot => $player_id) {
             }
 
 
-
         }
         echo "</table>";
 
@@ -359,7 +386,7 @@ foreach ($roster as $slot => $player_id) {
         }
 
 // Sort teams by cumulativeSingleTeamPoints in descending order
-        usort($teams, function($a, $b) {
+        usort($teams, function ($a, $b) {
             return $b['cumulativeSingleTeamPoints'] <=> $a['cumulativeSingleTeamPoints'];
         });
 
@@ -367,6 +394,7 @@ foreach ($roster as $slot => $player_id) {
         echo "<table border='1' style='background-color: #fff;'>";
         echo "<tr><th>Projected Points</th><th>Total Projected Points</th><th>Team</th><th>Simulated Points</th><th>Total Simulated Points</th></tr>";
 
+// Loop through the sorted teams and display the data
 // Loop through the sorted teams and display the data
         foreach ($teams as $team) {
             $teamID = $team['teamID'];
@@ -387,22 +415,41 @@ foreach ($roster as $slot => $player_id) {
 
         echo "</table>";
 
-
-
-        // Update cumulative team points for future heats
+// Update cumulative team points for future heats
         foreach ($teamPoints as $teamID => $teamPointsValue) {
             $cumulativeTeamPoints[$teamID] = ($cumulativeTeamPoints[$teamID] ?? 0) + $teamPointsValue;
         }
-        // Update cumulative team points for future heats
         foreach ($teamSinglePoints as $teamID => $teamSinglePointsValue) {
             $cumulativeSingleTeamPoints[$teamID] = ($cumulativeSingleTeamPoints[$teamID] ?? 0) + $teamSinglePointsValue;
         }
-
     }
-    //include 'FutureMatchPlayerPPOtable.php';
-    $content = ob_get_clean();
-    include 'futurematchTeamScoreBreakdownTable.php';
-    echo "BADWOLF";
+
+// Add SQL query to update the futurematches table
+$homeTeamScore = $cumulativeTeamPoints[$hometeamID] ?? 0;
+$awayTeamScore = $cumulativeTeamPoints[$awayteamID] ?? 0;
+
+$updatefuturematchScores = "
+    INSERT INTO futurematches (matchID, hometeamID, awayteamID, homeTeamScore, awayTeamScore)
+    VALUES (:matchID, :hometeamID, :awayteamID, :homeTeamScore, :awayTeamScore)
+    ON DUPLICATE KEY UPDATE 
+        homeTeamScore = :homeTeamScore, 
+        awayTeamScore = :awayTeamScore
+";
+
+// Use PDO to prepare and execute the query securely
+$stmt = $pdo->prepare($updatefuturematchScores);
+$stmt->execute([
+    ':matchID' => $match_id,
+    ':hometeamID' => $hometeamID,
+    ':awayteamID' => $awayteamID,
+    ':homeTeamScore' => $homeTeamScore,
+    ':awayTeamScore' => $awayTeamScore,
+]);
+
+// Include any additional scripts or cleanup
+// include 'FutureMatchPlayerPPOtable.php';
+$content = ob_get_clean();
+include 'futurematchTeamScoreBreakdownTable.php';
     echo $content;
     ?>
 
@@ -417,9 +464,7 @@ foreach ($roster as $slot => $player_id) {
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
             margin: 0;
-            padding: 20px;
         }
 
         .match-header {
