@@ -135,11 +135,10 @@ if ($result_team->num_rows > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player Profile</title>
+    <link rel="stylesheet" href="includes/tableStyle.css">
+    <link rel="stylesheet" href="includes/headerStyle.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
+
         .profile-container {
             border: 1px solid #ddd;
             padding: 20px;
@@ -185,9 +184,8 @@ if ($result_team->num_rows > 0) {
     </style>
 </head>
 <body>
+<h1><?php echo htmlspecialchars($first_name); ?> <?php echo htmlspecialchars($last_name); ?></h1>
 <div class="profile-container">
-
-    <h1><?php echo htmlspecialchars($first_name); ?> <?php echo htmlspecialchars($last_name); ?></h1>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <?php
     // Dynamically build the SELECT query for columns 1–20
