@@ -146,10 +146,6 @@ if ($result_team->num_rows > 0) {
             margin: 0 auto;
             background-color: #f9f9f9;
         }
-        .profile-container h1 {
-            text-align: center;
-            color: #333;
-        }
         .profile-container p {
             font-size: 16px;
             color: #555;
@@ -160,27 +156,30 @@ if ($result_team->num_rows > 0) {
         .profile-container .details span {
             font-weight: bold;
         }
-        .profile-containercareer {
-            border: 1px solid #ddd;
-            padding: 20px;
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: #f9f9f9;
+        /* Styling for each team select container */
+        .year-select {
+            display: flex; /* Aligns label and select side by side */
+            align-items: center; /* Vertically centers content */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            padding: 10px 20px; /* Padding for better spacing */
+            border-radius: 5px; /* Rounded corners */
         }
-        .profile-containercareer h1 {
-            text-align: center;
-            color: #333;
+
+        /* Styling for labels */
+        .year-select label {
+            color: white; /* Text color */
+            padding-right: 10px; /* Adds space between label and select box */
+            font-size: 16px; /* Sets a consistent font size */
         }
-        .profile-containercareer p {
-            font-size: 16px;
-            color: #555;
+
+        /* Styling for select dropdowns */
+        .year-select select {
+            padding: 10px; /* Padding inside the select box */
+            font-size: 16px; /* Ensures font size consistency */
+            border-radius: 5px; /* Rounded corners */
+            border: none; /* Removes default border */
         }
-        .profile-containercareer .details {
-            margin-bottom: 10px;
-        }
-        .profile-containercareer .details span {
-            font-weight: bold;
-        }
+
     </style>
 </head>
 <body>
@@ -223,7 +222,7 @@ if ($result_team->num_rows > 0) {
     }
 
     // Close the database connection
-    $conn->close();
+
     ?>
     <body>
     <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
@@ -288,36 +287,6 @@ if ($result_team->num_rows > 0) {
     </div>
 </div>
 
-
-<div class="profile-container" id="profileContainer" style="display: none;">
-    <h1>Race Information</h1>
-    <div class="details">
-        <table border="1">
-            <thead>
-            <tr>
-                <th>Opponent</th>
-                <th>Heat Number</th>
-                <th>Score</th>
-                <th>Projected Points</th>
-                <th>PPA</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php while ($row = $result_matchinfo->fetch_assoc()): ?>
-                <tr>
-                    <td><a href="matchprofile.php?match=<?php echo htmlspecialchars($row['matchID']); ?>"><?php echo htmlspecialchars($row['opponentTeam']); ?></a></td>
-                    <td><?php echo htmlspecialchars($row['heatNumber']); ?></td>
-                    <td><?php echo htmlspecialchars($row['Score']); ?></td>
-                    <td><?php echo htmlspecialchars($row['projectedPoints']); ?></td>
-                    <td><?php echo htmlspecialchars($row['PPA']); ?></td>
-
-                </tr>
-            <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-
 <div class="profile-containercareer" id="profileContainercareer" style="display: none; ">
     <h1>Career</h1>
     <div class="details">
@@ -359,10 +328,85 @@ if ($result_team->num_rows > 0) {
         </table>
     </div>
 </div>
+<?php
+// Fetch the distinct years for the dropdown
+$yearquery = "SELECT DISTINCT yearnum FROM matches ORDER BY yearnum ASC";
+$stmt_year = $conn->prepare($yearquery);
+$stmt_year->execute();
+$years = $stmt_year->get_result();
+
+// Fetch player information for the first time (optional if needed)
+$sql_matchinfo = "
+    SELECT 
+        h.heatNumber, 
+        h.Score, 
+        h.PPA,
+        h.projectedPoints, 
+        h.matchID,
+        CASE 
+            WHEN m.homeTeamID = p.teamID THEN t2.teamName 
+            WHEN m.awayTeamID = p.teamID THEN t1.teamName 
+        END AS opponentTeam
+    FROM 
+        heatinformation h
+    JOIN 
+        matches m 
+    ON 
+        h.matchID = m.matchID
+    JOIN 
+        player p 
+    ON 
+        h.playerID = p.playerID
+    JOIN 
+        team t1 
+    ON 
+        m.homeTeamID = t1.teamID
+    JOIN 
+        team t2 
+    ON 
+        m.awayTeamID = t2.teamID
+    WHERE 
+        h.playerID = ?";
+$stmt_matchinfo = $conn->prepare($sql_matchinfo);
+$stmt_matchinfo->bind_param("i", $player_id);
+$stmt_matchinfo->execute();
+$result_matchinfo = $stmt_matchinfo->get_result();
+?>
+
+<div class="profile-containerRace" id="profile-containerRace" style="display: none;">
+    <h1>Race Information</h1>
+
+    <div class="details">
+        <table border="1">
+            <thead>
+            <tr>
+                <th>Opponent</th>
+                <th>Heat Number</th>
+                <th>Score</th>
+                <th>Projected Points</th>
+                <th>PPA</th>
+            </tr>
+            </thead>
+            <tbody id="match-info-table">
+            <?php while ($row = $result_matchinfo->fetch_assoc()): ?>
+                <tr>
+                    <td><a href="matchprofile.php?match=<?php echo htmlspecialchars($row['matchID']); ?>"><?php echo htmlspecialchars($row['opponentTeam']); ?></a></td>
+                    <td><?php echo htmlspecialchars($row['heatNumber']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Score']); ?></td>
+                    <td><?php echo htmlspecialchars($row['projectedPoints']); ?></td>
+                    <td><?php echo htmlspecialchars($row['PPA']); ?></td>
+                </tr>
+            <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
 
 <script>
     const toggleButton = document.getElementById('toggleButton');
-    const profileContainer = document.getElementById('profileContainer');
+    const profileContainer = document.getElementById('profile-containerRace');
 
     toggleButton.addEventListener('click', () => {
         const isHidden = profileContainer.style.display === 'none';
@@ -378,6 +422,22 @@ if ($result_team->num_rows > 0) {
         profileContainercareer.style.display = isHidden ? 'block' : 'none';
         toggleButtonCareer.textContent = isHidden ? 'Hide Career Info' : 'Show Career Info';
     });
+    function goToYear() {
+        const selectedYear = document.getElementById('year').value;
+
+        if (selectedYear) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'fetch_match_info.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Replace the entire profile container with the updated content
+                    document.getElementById('profile-containerRace').innerHTML = xhr.responseText;
+                }
+            };
+            xhr.send('year=' + selectedYear);
+        }
+    }
 </script>
 </body>
 </html>

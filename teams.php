@@ -4,7 +4,7 @@ include 'includes/topbar.php';
 
 
 // Fetch teams and their players from the database
-$sql = "SELECT p.PlayerID, p.FirstName, p.LastName, p.TeamID, t.teamName 
+$sql = "SELECT p.PlayerID, p.FirstName, p.LastName, p.TeamID, t.teamName,t.TeamID 
         FROM player p
         LEFT JOIN team t ON p.TeamID = t.TeamID
         WHERE p.TeamID != 0
@@ -16,6 +16,7 @@ if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         // Group players by TeamID
         $teams[$row['TeamID']]['teamName'] = $row['teamName'];
+        $teams[$row['TeamID']]['teamID'] = $row['TeamID'];
         $teams[$row['TeamID']]['players'][] = [
             'PlayerID' => $row['PlayerID'],
             'FirstName' => $row['FirstName'],
@@ -38,12 +39,7 @@ $conn->close();
     <link rel="stylesheet" href="includes/tableStyle.css">
     <link rel="stylesheet" href="includes/headerStyle.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
+
         .container {
             width: 80%;
             margin: 0 auto;
@@ -56,9 +52,6 @@ $conn->close();
             margin: 20px 0;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        .team h2 {
-            margin-bottom: 15px;
         }
         .player-list {
             display: flex;
@@ -80,16 +73,24 @@ $conn->close();
             font-size: 18px;
             font-weight: bold;
         }
+        .no-link {
+            text-decoration: none;
+            color: inherit;
+        }
 
     </style>
 </head>
 <body>
-<div class="container">
+
     <h1>Player Profiles by Team</h1>
 
     <?php foreach ($teams as $team): ?>
+        <h2>
+            <a class="no-link" href="team.php?id=<?php echo $team['teamID']; ?>">
+                <?php echo $team['teamName']; ?>
+            </a></h2>
+    <div class="container">
         <div class="team">
-            <h2><?php echo $team['teamName']; ?></h2>
             <div class="player-list">
                 <?php foreach ($team['players'] as $player): ?>
                     <div class="player">
@@ -100,7 +101,8 @@ $conn->close();
                 <?php endforeach; ?>
             </div>
         </div>
+    </div>
     <?php endforeach; ?>
-</div>
+
 </body>
 </html>
