@@ -43,8 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['roster']) && !empty($_POST['roster'])) {
         $roster = $_POST['roster'];
 
-
-
         foreach ($roster as $slot => $player_id) {
             $player_stmt = $pdo->prepare("SELECT FirstName, lastName, Elo, teamID FROM player WHERE PlayerID = ?");
             $player_stmt->execute([$player_id]);
