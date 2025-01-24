@@ -178,10 +178,15 @@ Heat Number: $heatNumber</h2>";
     <?php echo $dataRow['FirstName'] . ' ' . $dataRow['LastName']; ?></a></td>
         <?php
                     echo"<td>{$dataRow['TeamName']}</td>";
-                if($dataRow['bonus'] ==1) {
-                    echo "<td>".$dataRow['Score'].'+1'."</td>";
+                if($dataRow['bonus']) {
+                    echo "<td>".$dataRow['Score'].'<sup>+1'."</sup>"."</td>";
                 }else{
-                    echo "<td>".$dataRow['Score']."</td>";
+                    if($dataRow['Status'])
+                    {
+                        echo "<td>".$dataRow['Status']."</td>";
+                    }else {
+                        echo "<td>" . $dataRow['Score'] . "</td>";
+                    }
                 }
                 echo"
                     
