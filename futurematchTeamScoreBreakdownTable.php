@@ -56,7 +56,8 @@
     }
 
 
-</style>
+</style><br><br>
+<html>
 <div class="team-tables">
     <?php
 
@@ -118,3 +119,4 @@
     }
     ?>
 </div>
+</html>
