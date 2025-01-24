@@ -79,6 +79,40 @@ try {
         text-align: center;
 
     }
+    .team-section {
+        margin-bottom: 30px;
+    }
+    /* Styling for form container */
+    form {
+        display: flex; /* Makes form elements align horizontally */
+        gap: 20px; /* Adds space between form elements */
+        justify-content: center; /* Centers the form content */
+        flex-wrap: wrap; /* Allows wrapping if necessary on smaller screens */
+    }
+
+    /* Styling for each team select container */
+    .team-select {
+        display: flex; /* Aligns label and select side by side */
+        align-items: center; /* Vertically centers content */
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        padding: 10px 20px; /* Padding for better spacing */
+        border-radius: 5px; /* Rounded corners */
+    }
+
+    /* Styling for labels */
+    .team-select label {
+        color: white; /* Text color */
+        padding-right: 10px; /* Adds space between label and select box */
+        font-size: 16px; /* Sets a consistent font size */
+    }
+
+    /* Styling for select dropdowns */
+    .team-select select {
+        padding: 10px; /* Padding inside the select box */
+        font-size: 16px; /* Ensures font size consistency */
+        border-radius: 5px; /* Rounded corners */
+        border: none; /* Removes default border */
+    }
 
     .heat-table { margin-bottom: 40px; }
 </style>
@@ -89,61 +123,104 @@ $counterin1=0;
 $counterin2=0;
 $wrongwinner=0;
 // Display matches grouped by week
+$yearquery = "SELECT DISTINCT yearnum FROM matches ORDER BY yearnum ASC";
+$stmt = $pdo->prepare($yearquery);
+$stmt->execute();
+$years = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+?>
+<form method="post">
+    <div class="team-select">
+        <label for="year">Year: </label>
+        <select name="year" id="year" required onchange="goToYear()">
+            <option value="">--Select Year--</option>
+            <?php foreach ($years as $year): ?>
+                <option value="<?= htmlspecialchars($year) ?>"><?= htmlspecialchars($year) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</form>
+
+<script>
+    function goToYear() {
+        const year = document.getElementById("year").value;
+        if (year) {
+            // Redirect to URL with selected year in query string
+            window.location.href = `?year=${year}`;
+        }
+    }
+</script>
+<?php
 foreach ($matchesByWeek as $weekHeader => $matches) {
     echo "<div class='match-header'><strong>$weekHeader</strong></div><br>";
     echo "<table class='heat-table'>";
     echo "<tr>
             <th>Match ID</th>
             <th>Home Team</th>
-            <th>Score</th>
+            <th>Score (Projected)</th>
             <th>Away Team</th>
-            <th>Score</th>
+            <th>Score (Projected)</th>
           </tr>";
+
     foreach ($matches as $row) {
         echo "<tr>";
 
-        // Check if information exists in the heatInformation table for this matchID
         $matchID = $row['matchID'];
+        $homeTeamName = $row['homeTeamName'];
+        $awayTeamName = $row['awayTeamName'];
+
+        // Check if heat information exists
         $heatInfoQuery = "
         SELECT COUNT(*) 
         FROM heatinformation 
         WHERE matchID = :matchID
-    ";
+        ";
         $heatInfoStmt = $pdo->prepare($heatInfoQuery);
-        $heatInfoStmt->execute(['matchID' => $matchID]);
+        $heatInfoStmt->execute([':matchID' => $matchID]);
         $heatInfoExists = $heatInfoStmt->fetchColumn();
 
         if ($heatInfoExists > 0) {
-            // If records exist, link to matchprofile.php
+            // Use heat information for the match
+            $homeScore = $row['homeTeamScore'] ?? 0;
+            $homeProjected = $row['homeTeamProjectedScore'] ?? 0;
+            $awayScore = $row['awayTeamScore'] ?? 0;
+            $awayProjected = $row['awayTeamProjectedScore'] ?? 0;
+
             echo "<td><a href='matchprofile.php?match={$matchID}'>{$matchID}</a></td>";
+            echo "<td>{$homeTeamName}</td>";
+            echo "<td>$homeScore({$homeProjected})</td>";
+            echo "<td>{$awayTeamName}</td>";
+            echo "<td>$awayScore({$awayProjected})</td>";
         } else {
-            // If no records exist, link to futurematchprofile.php
-            echo "<td><a href='futurematchprofile.php?match={$matchID}'>$matchID</a></td>";
+            // No heat information, use futurematch projections or defaults
+            $futureMatchQuery = "
+            SELECT 
+                homeTeamScore AS homeProjectedScore, 
+                awayTeamScore AS awayProjectedScore
+            FROM futurematches
+            WHERE matchID = :matchID
+            ";
+            $futureMatchStmt = $pdo->prepare($futureMatchQuery);
+            $futureMatchStmt->execute([':matchID' => $matchID]);
+            $futureMatchResult = $futureMatchStmt->fetch(PDO::FETCH_ASSOC);
+
+            $homeProjected = $futureMatchResult['homeProjectedScore'] ?? 0;
+            $awayProjected = $futureMatchResult['awayProjectedScore'] ?? 0;
+
+            echo "<td><a href='futurematchprofile.php?match={$matchID}'>{$matchID}</a></td>";
+            echo "<td>{$homeTeamName}</td>";
+            echo "<td>({$homeProjected})</td>";
+            echo "<td>{$awayTeamName}</td>";
+            echo "<td>({$awayProjected})</td>";
         }
 
-        echo "<td>{$row['homeTeamName']}</td>";
-        if (isset($row['homeTeamScore'])) {
-            echo "<td>".$row['homeTeamScore']."(".$row['homeTeamProjectedScore'].")"."</td>";
-        } else {
-            echo "<td>0</td>";
-        }
+        // Display the match information
 
-        echo "<td>{$row['awayTeamName']}</td>";
-        if (isset($row['awayTeamScore'])) {
-            echo "<td>".$row['awayTeamScore']."(".$row['awayTeamProjectedScore'].")"."</td>";
-        } else {
-            echo "<td>0</td>";
-        }
         echo "</tr>";
     }
 
-
     echo "</table>";
-
 }
-//echo "Close: ".$counterin1.'<br>';
-//echo "Close in 2: ".$counterin2.'<br>';
-//echo "Wrong Winner: ".$wrongwinner;
 ?>
 
 </body>
