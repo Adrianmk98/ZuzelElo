@@ -570,7 +570,7 @@ include 'futurematchTeamScoreBreakdownTable.php';
 //include 'winprobabiltycalculator.php';
 //include 'elochangecalculator.php';
 ?>
-
+<br><br><br><br>
 
 
 
