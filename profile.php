@@ -344,8 +344,8 @@ $sql_matchinfo = "
         h.projectedPoints, 
         h.matchID,
         CASE 
-            WHEN m.homeTeamID = p.teamID THEN t2.teamName 
-            WHEN m.awayTeamID = p.teamID THEN t1.teamName 
+            WHEN m.homeTeamID = h.currentplayerteamID THEN t2.teamName 
+            WHEN m.awayTeamID = h.currentplayerteamID THEN t1.teamName 
         END AS opponentTeam
     FROM 
         heatinformation h
@@ -353,10 +353,6 @@ $sql_matchinfo = "
         matches m 
     ON 
         h.matchID = m.matchID
-    JOIN 
-        player p 
-    ON 
-        h.playerID = p.playerID
     JOIN 
         team t1 
     ON 
@@ -367,6 +363,7 @@ $sql_matchinfo = "
         m.awayTeamID = t2.teamID
     WHERE 
         h.playerID = ?";
+
 $stmt_matchinfo = $conn->prepare($sql_matchinfo);
 $stmt_matchinfo->bind_param("i", $player_id);
 $stmt_matchinfo->execute();
