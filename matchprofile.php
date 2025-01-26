@@ -210,12 +210,6 @@ endforeach;
     <link rel="stylesheet" href="includes/tableStyle.css">
     <link rel="stylesheet" href="includes/headerStyle.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-        }
 
         .match-header {
             margin-bottom: 20px;
