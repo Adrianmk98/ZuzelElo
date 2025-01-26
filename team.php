@@ -10,40 +10,9 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 }
 
 // Query to fetch ranked players by team
-$sql = "WITH PlayerRanks AS (
-    SELECT
-        PlayerID,
-        FirstName,
-        LastName,
-        YoB,
-        teamID,
-        Elo,
-        RANK() OVER (PARTITION BY teamID ORDER BY Elo DESC) AS OverallRank,
-        RANK() OVER (
-            PARTITION BY teamID 
-            ORDER BY CASE WHEN YEAR(CURDATE()) - YoB > 21 AND YEAR(CURDATE()) - YoB < 24 THEN Elo ELSE NULL END DESC
-        ) AS Under24Over21Rank,
-        RANK() OVER (
-            PARTITION BY teamID 
-            ORDER BY CASE WHEN YEAR(CURDATE()) - YoB > 24 THEN Elo ELSE NULL END DESC
-        ) AS Over24Rank,
-        RANK() OVER (
-            PARTITION BY teamID 
-            ORDER BY CASE WHEN YEAR(CURDATE()) - YoB < 21 THEN Elo ELSE NULL END DESC
-        ) AS Under21Rank
-    FROM player
-)
-SELECT 
-    teamID,
-    MAX(CASE WHEN Over24Rank = 1 THEN PlayerID END) AS id5,
-    MAX(CASE WHEN Under24Over21Rank = 1 THEN PlayerID END) AS id4,
-    MAX(CASE WHEN Over24Rank = 2 THEN PlayerID END) AS id1,
-    MAX(CASE WHEN Over24Rank = 3 THEN PlayerID END) AS id2,
-    MAX(CASE WHEN Over24Rank = 4 THEN PlayerID END) AS id3,
-    MAX(CASE WHEN Under21Rank = 1 THEN PlayerID END) AS id6,
-    MAX(CASE WHEN Under21Rank = 2 THEN PlayerID END) AS id7,
-    MAX(CASE WHEN Under21Rank = 3 THEN PlayerID END) AS id8
-FROM PlayerRanks WHERE teamID=$teamID
+$sql = "SELECT
+        id1,id2,id3,id4,id5,id6,id7,id8
+FROM futurematchroster WHERE teamID=$teamID
 GROUP BY teamID";
 
 $result = $conn->query($sql);
@@ -58,6 +27,10 @@ if ($result->num_rows > 0) {
             margin: 0 auto; /* Centers the table horizontally */
             border-collapse: collapse; /* Ensures borders between table cells collapse into a single border */
             width: 50%; /* Adjust the width to control the table's size */
+        }
+        .no-link {
+            text-decoration: none;
+            color: inherit;
         }
     </style>
     <h2>Projected Roster</h2>
@@ -129,10 +102,12 @@ if ($rosterResult->num_rows > 0) {
         </tr>";
 
     while ($row = $rosterResult->fetch_assoc()) {
-        echo "<tr>
-                <td>" . $row['FirstName'] . "
-                " . $row['LastName'] . "</td>
-                <td>".$row['YoB'] ."(".date('Y')-$row['YoB'].")". "</td>
+        ?>
+<tr>
+                <td><a class="no-link" href="profile.php?id=<?php echo $row['PlayerID']; ?>">
+                    <?php echo $row['FirstName'] . ' ' . $row['LastName']; ?></td>
+        <?php
+                echo"<td>".$row['YoB'] ."(".date('Y')-$row['YoB'].")". "</td>
                 <td>" . $row['Elo'] . "</td>
               </tr>";
     }
@@ -145,4 +120,5 @@ if ($rosterResult->num_rows > 0) {
 
 
 $conn->close();
+
 ?>
