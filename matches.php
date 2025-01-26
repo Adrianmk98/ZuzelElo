@@ -67,56 +67,103 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="includes/tableStyle.css">
     <link rel="stylesheet" href="includes/headerStyle.css">
-<style>
-    body { font-family: Arial, sans-serif;  margin: 0;  }
-    .match-header {
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-        color: white; /* Text color */
-        padding: 10px 20px; /* Adds some space around the text */
-        border-radius: 5px; /* Optional: rounds the corners for a softer look */
-        font-size: 18px; /* Optional: adjust the font size */
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Optional: adds a shadow behind the text to make it stand out */
-        text-align: center;
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
 
-    }
-    .team-section {
-        margin-bottom: 30px;
-    }
-    /* Styling for form container */
-    form {
-        display: flex; /* Makes form elements align horizontally */
-        gap: 20px; /* Adds space between form elements */
-        justify-content: center; /* Centers the form content */
-        flex-wrap: wrap; /* Allows wrapping if necessary on smaller screens */
-    }
+        /* Match header styling */
+        .match-header {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
 
-    /* Styling for each team select container */
-    .team-select {
-        display: flex; /* Aligns label and select side by side */
-        align-items: center; /* Vertically centers content */
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-        padding: 10px 20px; /* Padding for better spacing */
-        border-radius: 5px; /* Rounded corners */
-    }
+        /* Team section and form styling */
+        .team-section {
+            margin-bottom: 30px;
+        }
 
-    /* Styling for labels */
-    .team-select label {
-        color: white; /* Text color */
-        padding-right: 10px; /* Adds space between label and select box */
-        font-size: 16px; /* Sets a consistent font size */
-    }
+        form {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 10px; /* Added padding for spacing */
+        }
 
-    /* Styling for select dropdowns */
-    .team-select select {
-        padding: 10px; /* Padding inside the select box */
-        font-size: 16px; /* Ensures font size consistency */
-        border-radius: 5px; /* Rounded corners */
-        border: none; /* Removes default border */
-    }
+        .team-select {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            flex: 1; /* Ensures flexibility for mobile screens */
+            min-width: 250px; /* Prevents too small containers */
+            max-width: 100%; /* Ensures the form remains responsive */
+        }
 
-    .heat-table { margin-bottom: 40px; }
-</style>
+        .team-select label {
+            color: white;
+            padding-right: 10px;
+            font-size: 16px;
+        }
+
+        .team-select select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            width: 100%; /* Takes full width on smaller screens */
+        }
+
+        /* Heat table spacing */
+        .heat-table {
+            margin-bottom: 40px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .match-header {
+                font-size: 16px;
+                padding: 8px 15px;
+            }
+
+            form {
+                gap: 10px; /* Reduce gap between elements */
+                padding: 5px; /* Reduce padding */
+            }
+
+            .team-select {
+                flex-direction: column; /* Stack label and select vertically */
+                align-items: flex-start; /* Align items to the start */
+            }
+
+            .team-select label {
+                padding-right: 0;
+                margin-bottom: 5px; /* Adds space between label and select */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .match-header {
+                font-size: 14px;
+                padding: 6px 10px;
+            }
+
+            .team-select {
+                min-width: 200px; /* Further reduce minimum width */
+            }
+        }
+    </style>
 </head>
+
 <body>
 <?php
 $counterin1=0;
@@ -204,14 +251,38 @@ foreach ($matchesByWeek as $weekHeader => $matches) {
             $futureMatchStmt->execute([':matchID' => $matchID]);
             $futureMatchResult = $futureMatchStmt->fetch(PDO::FETCH_ASSOC);
 
+            $nogameplayed="Select heatsInMatch from matches WHERE matchID = :matchID";
+
+            $nogame = $pdo->prepare($nogameplayed);
+            $nogame->execute([':matchID' => $matchID]);
+            $nogameresult = $nogame->fetch(PDO::FETCH_ASSOC);
+
+
+
             $homeProjected = $futureMatchResult['homeProjectedScore'] ?? 0;
             $awayProjected = $futureMatchResult['awayProjectedScore'] ?? 0;
 
             echo "<td><a href='futurematchprofile.php?match={$matchID}'>{$matchID}</a></td>";
             echo "<td>{$homeTeamName}</td>";
-            echo "<td>({$homeProjected})</td>";
+            ?>
+            <td>
+<?php
+if($nogameresult['heatsInMatch']==0)
+{
+    echo "0";
+}
+echo "(".$homeProjected.")";
+?></td><?php
             echo "<td>{$awayTeamName}</td>";
-            echo "<td>({$awayProjected})</td>";
+            ?>
+             <td>
+<?php
+if($nogameresult['heatsInMatch']==0)
+{
+    echo "0";
+}
+echo "(".$awayProjected.")";
+?></td><?php
         }
 
         // Display the match information
