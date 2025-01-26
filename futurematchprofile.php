@@ -470,6 +470,7 @@ include 'futurematchTeamScoreBreakdownTable.php';
         .match-header {
             margin-bottom: 20px;
             text-align: center;
+            font-size: 1.5em; /* Adjust font size */
         }
 
         .scoreboard {
@@ -482,6 +483,8 @@ include 'futurematchTeamScoreBreakdownTable.php';
             padding: 15px;
             text-align: center;
             margin: 0 auto;
+            max-width: 100%; /* Ensure scoreboard fits within the screen */
+            box-sizing: border-box; /* Include padding in width calculation */
         }
 
         .header {
@@ -489,6 +492,8 @@ include 'futurematchTeamScoreBreakdownTable.php';
             justify-content: space-between;
             align-items: flex-start; /* Align items at the top */
             padding: 10px;
+            flex-wrap: wrap; /* Allow wrapping for small screens */
+            gap: 10px; /* Add space between items when wrapped */
         }
 
         .team {
@@ -496,55 +501,58 @@ include 'futurematchTeamScoreBreakdownTable.php';
             flex-direction: column;
             align-items: center;
             flex: 1;
+            min-width: 120px; /* Minimum width to avoid overly narrow columns */
         }
 
         .team-label {
-            font-size: 1.5em;
+            font-size: 1.3em; /* Slightly smaller for mobile */
             font-weight: bold;
             color: #444;
             margin-bottom: 5px;
+            text-align: center;
         }
 
         .team-name {
-            font-size: 1.2em;
+            font-size: 1.1em; /* Adjust font size */
             font-weight: bold;
             margin-bottom: 5px;
             text-align: center;
             word-wrap: break-word;
             overflow: hidden;
             line-height: 1.4em; /* Consistent line spacing */
-            height: 2.8em; /* Reserve space for up to two lines of text */
+            max-height: 2.8em; /* Reserve space for up to two lines of text */
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 0 10px; /* Add padding for better readability */
         }
 
         .score {
-            font-size: 1.8em;
+            font-size: 1.5em; /* Adjust for smaller screens */
             font-weight: bold;
             color: #0056b3;
             margin-top: 5px;
-            min-height: 1.8em; /* Ensure consistent height for the score block */
+            min-height: 1.8em; /* Ensure consistent height */
         }
 
-
-
         .vs {
-            font-size: 1.2em;
+            font-size: 1em; /* Reduce size */
             color: #666;
-            margin: 0 15px;
+            margin: 0 10px; /* Adjust spacing */
         }
 
         .details {
             margin-top: 15px;
             display: flex;
-            justify-content: space-around;
+            flex-direction: column; /* Stack details vertically for small screens */
+            gap: 10px; /* Add space between detail sections */
             border-top: 1px solid #ddd;
             padding-top: 10px;
         }
 
         .info {
-            font-size: 1em;
+            font-size: 0.9em; /* Reduce font size slightly */
+            text-align: center; /* Center-align details */
         }
 
         .label {
@@ -556,6 +564,49 @@ include 'futurematchTeamScoreBreakdownTable.php';
             color: #333;
         }
 
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column; /* Stack teams vertically */
+                align-items: center;
+            }
+
+            .team {
+                min-width: unset; /* Allow team sections to shrink naturally */
+                margin-bottom: 10px; /* Add spacing between teams */
+            }
+
+            .team-label, .team-name, .score {
+                font-size: 1em; /* Reduce font sizes for better fit */
+            }
+
+            .vs {
+                font-size: 0.9em; /* Smaller text for "vs" */
+            }
+
+            .details {
+                gap: 8px; /* Slightly reduce gap */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scoreboard {
+                padding: 10px; /* Compact padding */
+                width: 100%; /* Fit scoreboard within narrow screens */
+            }
+
+            .team-label, .team-name, .score, .vs {
+                font-size: 0.8em; /* Further reduce text sizes for small screens */
+            }
+
+            .details {
+                gap: 5px; /* Compact gap */
+            }
+
+            .info {
+                font-size: 0.8em; /* Reduce info text size */
+            }
+        }
 
 
     </style>

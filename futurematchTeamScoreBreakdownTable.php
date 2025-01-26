@@ -7,12 +7,13 @@
         padding: 20px; /* Adds padding around the entire container */
         background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
         border-radius: 10px; /* Rounded corners for the container */
+        flex-wrap: wrap; /* Allow wrapping for smaller screens */
     }
 
     /* Styling for each individual team table */
     .team-table {
         flex: 1;
-        max-width: 48%; /* Adjust width if needed */
+        max-width: 100%; /* Adjust width for desktop view */
         background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white for each table */
         border-radius: 10px; /* Rounded corners for each table */
         padding: 15px; /* Padding for each table */
@@ -54,6 +55,19 @@
     .team-table table tr:hover {
         background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
     }
+
+    /* Responsive styles for smaller screens */
+    @media (max-width: 768px) {
+        .team-tables {
+            flex-direction: column; /* Stack tables vertically */
+        }
+
+        .team-table {
+            max-width: 100%; /* Full width for each table */
+            margin-bottom: 20px; /* Add space between stacked tables */
+        }
+    }
+
 
 
 </style><br><br>

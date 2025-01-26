@@ -1,18 +1,73 @@
-h1, h2,h3,h4 {
+h1, h2, h3, h4 {
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
     color: white; /* Text color */
-    padding: 15px 30px; /* Adds more space for headers */
-    border-radius: 5px; /* Optional: rounds the corners for a softer look */
-    font-size: inherit; /* Inherit the font size from the default styles for consistency */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds a shadow behind the text for better contrast */
+    padding: 15px 30px; /* Space around the text */
+    border-radius: 5px; /* Rounded corners */
+    font-size: inherit; /* Maintain default sizes unless specified */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Shadow for contrast */
     text-align: center;
+    margin: 10px 0; /* Add vertical spacing between headers */
+    word-wrap: break-word; /* Prevent text overflow on smaller screens */
 }
 
-/* Optional: Adjust h1 and h2 sizes for emphasis */
+/* Specific sizes for each header */
 h1 {
-    font-size: 36px; /* Larger font for h1 */
+    font-size: 36px; /* Emphasize h1 */
 }
 
 h2 {
     font-size: 28px; /* Slightly smaller for h2 */
+}
+
+h3 {
+    font-size: 22px; /* Smaller than h2 */
+}
+
+h4 {
+    font-size: 18px; /* Smaller for subheaders */
+}
+
+/* Responsive adjustments for smaller devices */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 30px; /* Reduce size for tablets */
+        padding: 12px 20px; /* Adjust padding */
+    }
+
+    h2 {
+        font-size: 24px; /* Slightly smaller for tablets */
+        padding: 10px 18px; /* Adjust padding */
+    }
+
+    h3 {
+        font-size: 20px; /* Reduce size for tablets */
+        padding: 8px 15px; /* Adjust padding */
+    }
+
+    h4 {
+        font-size: 16px; /* Adjust for subheaders */
+        padding: 6px 12px; /* Smaller padding */
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px; /* Smaller size for phones */
+        padding: 10px 15px; /* Compact padding */
+    }
+
+    h2 {
+        font-size: 20px; /* Slightly smaller for phones */
+        padding: 8px 12px; /* Compact padding */
+    }
+
+    h3 {
+        font-size: 18px; /* Smaller for subheaders on phones */
+        padding: 6px 10px; /* Compact padding */
+    }
+
+    h4 {
+        font-size: 14px; /* Smallest size for subheaders */
+        padding: 4px 8px; /* Minimal padding */
+    }
 }
