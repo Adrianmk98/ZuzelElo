@@ -151,7 +151,7 @@ if (count($players) >= 4) {
     FROM `heatinformation` h
     LEFT JOIN `team` t ON h.`currentplayerteamID` = t.`teamID`
     LEFT JOIN `player` p on h.`playerID`=p.`playerID`
-    WHERE h.`matchID` = $matchID AND h.`heatNumber` = $heatNumber";
+    WHERE h.`matchID` = $matchID AND h.`heatNumber` = $heatNumber ORDER BY h.startingpositionID";
 
 
         $dataResult = $conn->query($dataQuery);
