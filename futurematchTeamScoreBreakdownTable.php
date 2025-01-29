@@ -1,136 +1,267 @@
-<style>
-    /* Container for the team tables */
-    .team-tables {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        padding: 20px; /* Adds padding around the entire container */
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-        border-radius: 10px; /* Rounded corners for the container */
-        flex-wrap: wrap; /* Allow wrapping for smaller screens */
-    }
-
-    /* Styling for each individual team table */
-    .team-table {
-        flex: 1;
-        max-width: 100%; /* Adjust width for desktop view */
-        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white for each table */
-        border-radius: 10px; /* Rounded corners for each table */
-        padding: 15px; /* Padding for each table */
-        box-sizing: border-box; /* Ensures padding doesn't affect width */
-    }
-
-    /* Heading styling for each team table */
-    .team-table h2 {
-        text-align: center;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-        color: white; /* White text */
-        padding: 10px; /* Padding for header */
-        border-radius: 5px; /* Rounded corners for header */
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Text shadow for contrast */
-    }
-
-    /* Table styling */
-    .team-table table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    /* Table header and data cell styling */
-    .team-table table th, .team-table table td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-        border-radius: 5px; /* Rounded corners for each cell */
-    }
-
-    /* Table header background */
-    .team-table table th {
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background for headers */
-        color: white; /* White text in headers */
-    }
-
-    /* Optional: Table row hover effect */
-    .team-table table tr:hover {
-        background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
-    }
-
-    /* Responsive styles for smaller screens */
-    @media (max-width: 768px) {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <title>Team Tables</title>
+    <style>
+        /* Container for the team tables */
         .team-tables {
-            flex-direction: column; /* Stack tables vertically */
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            flex-wrap: wrap;
+            position: relative;
         }
 
+        /* Individual team table styling */
         .team-table {
-            max-width: 100%; /* Full width for each table */
-            margin-bottom: 20px; /* Add space between stacked tables */
+            flex: 1;
+            max-width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            position: relative;
         }
-    }
 
+        /* Header section for team logo, score, and name */
+        .team-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
 
+        /* Align logo and score horizontally */
+        .team-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-</style><br><br>
-<html>
-<div class="team-tables">
+        /* Team logo styling */
+        .team-logo {
+            max-width: 128px;
+            max-height: 128px;
+        }
+
+        /* Score next to the logo */
+        .team-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark background for contrast */
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* House emoji in the top right */
+        .home-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+        }
+
+        /* Team name styling */
+        .team-table h2 {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            width: 100%;
+        }
+
+        /* Table styling */
+        .team-table table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .team-table table th, .team-table table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        /* Table header background */
+        .team-table table th {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        /* Row hover effect */
+        .team-table table tr:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .team-tables {
+                flex-direction: column;
+            }
+
+            .team-table {
+                max-width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Button styling */
+        #download-btn {
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            color: white; /* Text color */
+            padding: 15px 30px; /* Padding for better button size */
+            border-radius: 5px; /* Rounded corners */
+            font-size: 18px; /* Font size */
+            cursor: pointer; /* Adds pointer cursor on hover */
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Text shadow for contrast */
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="team-tables" id="teamTables">
     <?php
-
     // Group players by team
     $playersByTeam = [];
     foreach ($playerPPOData as $player) {
-        $playersByTeam[$player['teamName']][] = $player;
+        $playersByTeam[$player['teamID']][] = $player;
+
     }
 
-    // Generate tables for each team
-    foreach ($playersByTeam as $teamName => $players) {
-        $teamID = $players[0]['teamID'];
-        $teamClass = '';
-        $teamPrefix = '';  // Variable to hold prefix for team name
-        if ($teamID == $hometeamID) {
-            $teamClass = 'home-team'; // Class for home team
-            $teamPrefix = 'H-';       // Prefix for home team
-        } elseif ($teamID == $awayteamID) {
-            $teamClass = 'away-team'; // Class for away team
-            $teamPrefix = 'A-';       // Prefix for away team
+    // Fetch the ordered player IDs for each team
+    $rosterOrderQuery = "SELECT `teamID`, `id1`, `id2`, `id3`, `id4`, `id5`, `id6`, `id7`, `id8` FROM `futurematchroster`";
+    $rosterOrderResult = mysqli_query($conn, $rosterOrderQuery);
+
+    $rosterOrder = [];
+    while ($row = mysqli_fetch_assoc($rosterOrderResult)) {
+        $teamID = $row['teamID'];
+        // Store the ordered list of player IDs
+        $rosterOrder[$teamID] = array_filter([
+            $row['id1'], $row['id2'], $row['id3'], $row['id4'],
+            $row['id5'], $row['id6'], $row['id7'], $row['id8']
+        ]); // Remove empty values
+    }
+
+
+    foreach ($playersByTeam as $teamID => $players) {
+        $teamID = trim((string)$teamID);
+        if ($teamID !== $hometeamID && $teamID !== $awayteamID) {
+            continue;
         }
 
-        echo "<div class='team-table $teamClass'>";  // Add home-team or away-team class
-        echo "<h2>" . htmlspecialchars($teamPrefix . $teamName) . " (" . $cumulativeSingleTeamPoints[$teamID] .")</h2>";
+        // Sort players according to the roster order
+        usort($players, function ($a, $b) use ($rosterOrder, $teamID) {
+            $order = array_flip($rosterOrder[$teamID]); // Flip for index-based lookup
+            return ($order[$a['playerID']] ?? PHP_INT_MAX) - ($order[$b['playerID']] ?? PHP_INT_MAX);
+        });
+
+        echo "<div class='team-table'>";
+
+        // Team logo
+        $logoPath = "teamlogos/$teamID.jpg";
+        if (!file_exists($logoPath)) {
+            $logoPath = "teamlogos/0.jpg";
+        }
+
+        echo "<div class='team-header'>";
+        echo "<div class='team-logo-container'>";
+        echo "<img src='$logoPath' class='team-logo' alt='Team Logo'>";
+        echo "<div class='team-score'>" . $cumulativeTeamPoints[$teamID] . "</div>";
+        echo "</div>";
+
+        if ($teamID === $hometeamID) {
+            echo "<div class='home-icon'>🏠</div>";
+        }
+
+        echo "<h2>" . htmlspecialchars($players[0]['teamName']) . "</h2>";
+        echo "</div>";
+
         echo "<table>
         <thead>
-        <tr>
-            <th>Player</th>
-            <th>Total Score</th>
-            <th>Point Breakdown</th>
-        </tr>
+            <tr>
+                <th>#</th>  <!-- Player number column -->
+                <th>Player</th>
+                <th>Total Score</th>
+                <th>Point Breakdown</th>
+            </tr>
         </thead>
         <tbody>";
 
+        $playerNumber = 1; // Start numbering from 1 for home team
+        if ($teamID === $hometeamID) {
+            $playerNumber = 9; // Start numbering from 9 for away team
+        }
+
         foreach ($players as $player) {
-            $playerID = $player['playerID'];
-            $pointBreakdown = "N/A";
-            foreach ($playerPPOData as $playerData) {
-                if ($playerData['playerID'] == $playerID) {
-                    $pointBreakdown = implode(' , ', $playerData['pointBreakdown']);
-                    break;
-                }
-            }
+            $pointBreakdown = !empty($player['pointBreakdown']) ? implode(' , ', $player['pointBreakdown']) : "N/A";
 
             echo "<tr>
-            <td>" . htmlspecialchars($player['firstName'] . ' ' . $player['lastName']). "</td>
+            <td>" . $playerNumber . "</td> <!-- Display the player number -->
+            <td>" . htmlspecialchars($player['firstName']) . "<br>" . htmlspecialchars($player['lastName']) . "</td>
             <td>" . htmlspecialchars($player['Score']);
             if ($player['Bonus']) {
                 echo "<sup>+" . htmlspecialchars($player['Bonus']) . "</sup>";
             }
             echo "</td>
-            <td>(" . htmlspecialchars($pointBreakdown) . ")</td>
+            <td style='font-size: 10px'>(" . htmlspecialchars($pointBreakdown) . ")</td>
         </tr>";
+
+            $playerNumber++; // Increment the number for the next player
         }
 
-        echo "</tbody>
-    </table>";
-        echo "</div>"; // Close team-table
+        echo "</tbody></table>";
+        echo "</div>";
     }
+
     ?>
 </div>
+    <br>
+    <!-- Button to Download as JPG -->
+<button id="download-btn"
+        data-hometeam="<?php echo $match_details['homeTeamName']; ?>"
+        data-awayteam="<?php echo $match_details['awayTeamName']; ?>"
+        onclick="downloadImage()">Download
+</button>
+
+
+<script>
+        function downloadImage() {
+            const teamTables = document.getElementById("teamTables");
+
+            // Get the home and away team names from the button's data attributes
+            const button = document.getElementById("download-btn");
+            const homeTeam = button.getAttribute("data-hometeam").replace(/\s+/g, "_"); // Replace spaces with underscores
+            const awayTeam = button.getAttribute("data-awayteam").replace(/\s+/g, "_");
+
+            // Generate the filename dynamically
+            const fileName = `${homeTeam}_vs_${awayTeam}.jpg`;
+
+            html2canvas(teamTables, { backgroundColor: null }).then(canvas => {
+                let link = document.createElement("a");
+                link.href = canvas.toDataURL("image/jpeg", 1.0);
+                link.download = fileName;
+                link.click();
+            });
+        }
+
+    </script>
+
+
+</body>
 </html>

@@ -149,8 +149,8 @@ $playerPPOData[$playerID]['Score'] += $result['Score'];
 $playerPPOData[$playerID]['Bonus'] += $result['bonus'];
 
 // Query and logic for team scoring (home/away)
-$getteamQuery = $pdo->prepare("SELECT currentplayerteamID FROM heatinformation WHERE playerID = :playerID");
-$getteamQuery->execute(['playerID' => $playerID]);
+$getteamQuery = $pdo->prepare("SELECT currentplayerteamID FROM heatinformation WHERE playerID = :playerID AND matchID=:matchID");
+$getteamQuery->execute(['playerID' => $playerID,'matchID'=>$match_id]);
 $getteam = $getteamQuery->fetchColumn();
 
     $matchNumberMap = [
@@ -182,6 +182,7 @@ $getteam = $getteamQuery->fetchColumn();
 
     $teamType = ($hometeamID == $getteam) ? 'home' : (($awayteamID == $getteam) ? 'away' : null);
 
+
     if ($teamType && isset($matchNumberMap[$result['heatNumber']][$result['startingpositionID']])) {
         $playerPPOData[$playerID]['playerMatchNum'] = $matchNumberMap[$result['heatNumber']][$result['startingpositionID']][$teamType];
     }
@@ -189,8 +190,10 @@ $getteam = $getteamQuery->fetchColumn();
         $playerPPOData[$playerID]['playerMatchNum'] = 16;
     }
     if ($awayteamID == $getteam && !$playerPPOData[$playerID]['playerMatchNum']) {
+
         $playerPPOData[$playerID]['playerMatchNum'] = 8;
     }
+
 
 
 
@@ -412,6 +415,7 @@ foreach ($results_by_heat as $heat_number => $results):
                 // Initialize player data if not already set
                 if (!isset($playerPPOData[$playerID])) {
                     $playerPPOData[$playerID] = [
+                        'playerMatchNum'=>0,
                         'playerID' => $result['playerID'],
                         'firstName' => $result['firstName'],
                         'lastName' => $result['lastName'],
@@ -435,6 +439,7 @@ foreach ($results_by_heat as $heat_number => $results):
                         if (!isset($playerPPOData[$subPlayerID])) {
                             echo "Initializing substitute data for: " . htmlspecialchars($result['subFirstName'] . " " . $result['subLastName']) . "<br>";
                             $playerPPOData[$subPlayerID] = [
+                                'playerMatchNum'=>0,
                                 'playerID' => $subPlayerID,
                                 'firstName' => $result['subFirstName'],
                                 'lastName' => $result['subLastName'],
@@ -468,9 +473,50 @@ foreach ($results_by_heat as $heat_number => $results):
                 $playerPPOData[$playerID]['ppa'] += $result['PPA'];
 
                 // Query and logic for team scoring (home/away)
-                $getteamQuery = $pdo->prepare("SELECT currentplayerteamID FROM heatinformation WHERE playerID = :playerID");
-                $getteamQuery->execute(['playerID' => $playerID]);
+                $getteamQuery = $pdo->prepare("SELECT currentplayerteamID FROM heatinformation WHERE playerID = :playerID AND matchID= :matchID");
+                $getteamQuery->execute(['playerID' => $playerID,'matchID' => $match_id]);
                 $getteam = $getteamQuery->fetchColumn();
+
+                $matchNumberMap = [
+                    1 => [ // Heat 1
+                        1 => ['home' => 9, 'away' => 1],
+                        2 => ['home' => 9, 'away' => 1],
+                        3 => ['home' => 11, 'away' => 3],
+                        4 => ['home' => 11, 'away' => 3],
+                    ],
+                    2 => [ // Heat 2
+                        1 => ['home' => 15, 'away' => 6],
+                        2 => ['home' => 15, 'away' => 6],
+                        3 => ['home' => 14, 'away' => 7],
+                        4 => ['home' => 14, 'away' => 7],
+                    ],
+                    3 => [ // Heat 3
+                        1 => ['home' => 12, 'away' => 5],
+                        2 => ['home' => 12, 'away' => 5],
+                        3 => ['home' => 13, 'away' => 2],
+                        4 => ['home' => 13, 'away' => 2],
+                    ],
+                    4 => [ // Heat 4
+                        1 => ['home' => 14, 'away' => 4],
+                        2 => ['home' => 14, 'away' => 4],
+                        3 => ['home' => 10, 'away' => 6],
+                        4 => ['home' => 10, 'away' => 6],
+                    ],
+                ];
+
+                $teamType = ($hometeamID == $getteam) ? 'home' : (($awayteamID == $getteam) ? 'away' : null);
+
+
+                if ($teamType && isset($matchNumberMap[$result['heatNumber']][$result['startingpositionID']])) {
+                    $playerPPOData[$playerID]['playerMatchNum'] = $matchNumberMap[$result['heatNumber']][$result['startingpositionID']][$teamType];
+                }
+                if ($hometeamID == $getteam && !$playerPPOData[$playerID]['playerMatchNum']) {
+                    $playerPPOData[$playerID]['playerMatchNum'] = 16;
+                }
+                if ($awayteamID == $getteam && !$playerPPOData[$playerID]['playerMatchNum']) {
+
+                    $playerPPOData[$playerID]['playerMatchNum'] = 8;
+                }
 
 
 
@@ -485,6 +531,7 @@ foreach ($results_by_heat as $heat_number => $results):
                     $awayheatscore += $result['Score'];
                     $awaymatchcurrentscore+=$result['Score'];
                 }
+
                 ?>
                 <tr>
                     <td>
@@ -493,30 +540,38 @@ foreach ($results_by_heat as $heat_number => $results):
                             if($getteam==$hometeamID)
                             {
                                 echo "🟥";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }else{
                                 echo "⬜";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }
 
                         } elseif ($result['startingpositionID'] == 2) {
                             if($getteam==$hometeamID)
                             {
                                 echo "🟥";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }else{
                                 echo "⬜";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }
                         } elseif ($result['startingpositionID'] == 3) {
                             if($getteam==$hometeamID)
                             {
                                 echo "🟦";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }else{
                                 echo "🟨";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }
                         } elseif ($result['startingpositionID'] == 4) {
                             if($getteam==$hometeamID)
                             {
                                 echo "🟦";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }else{
                                 echo "🟨";
+                                echo $playerPPOData[$playerID]['playerMatchNum'];
                             }
                         }
                         ?>
@@ -551,7 +606,6 @@ foreach ($results_by_heat as $heat_number => $results):
                 </tr>
             <?php endforeach;
 
-            unset($result);
             ?>
             </tbody>
         </table>
@@ -580,7 +634,6 @@ foreach ($results_by_heat as $heat_number => $results):
         </table>
     </div>
 <?php endforeach;
-unset($results);
 
 // Assuming that $yearnum (2024) and $weeknum are already defined and represent the current year and week number
 foreach ($updatedEloRatings as $playerID => $finalElo) {

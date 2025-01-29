@@ -750,7 +750,7 @@ $matchNumberMap = [
             }
             echo "<h2>Heat $heat:</h2>";
             echo "<table border='1' style='background-color: #fff;'>";
-            echo "<tr><th>Slot</th><th>Player</th><th>Team</th><th>Projected Points</th><th>Win Chance</th><th>2nd Place Probability</th><th>3rd Place Probability</th><th>4th Place Probability</th></tr>";
+            echo "<tr><th>Slot</th><th>Player</th><th>Projected Points</th><th>Win Chance</th><th>2nd Place Probability</th><th>3rd Place Probability</th><th>4th Place Probability</th></tr>";
 
             // Get Elo ratings for players in this heat
             $playerIDs = [];
@@ -848,7 +848,6 @@ $matchNumberMap = [
                 //echo "<tr style='$goldStyle'>";
                 echo "<td>$slot</td>";
                 echo "<td>" . $player['FirstName'] . " " . $player['lastName'] . "</td>";
-                echo "<td>" . $player['teamName']."</td>";
                 echo "<td>" . round($playerResults['projected_points'], 2) . "</td>";
                 echo "<td>" . round($playerResults['win_chance'] * 100, 2) . "%</td>";
                 echo "<td>" . round($playerResults['finishing_probs'][1] * 100, 2) . "%</td>";
@@ -939,7 +938,6 @@ $matchNumberMap = [
             // Create an array of team data including teamID, teamName, and cumulativeSingleTeamPoints
 
 
-// Sort teams by cumulativeSingleTeamPoints in descending order
 
 // Display the table headers
             echo "<table border='1' style='background-color: #fff;'>";

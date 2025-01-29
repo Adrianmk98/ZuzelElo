@@ -98,29 +98,28 @@ try {
             padding: 10px; /* Added padding for spacing */
         }
 
+        /* Styling for each team select container */
         .team-select {
-            display: flex;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            border-radius: 5px;
-            flex: 1; /* Ensures flexibility for mobile screens */
-            min-width: 250px; /* Prevents too small containers */
-            max-width: 100%; /* Ensures the form remains responsive */
+            display: flex; /* Aligns label and select side by side */
+            align-items: center; /* Vertically centers content */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            padding: 10px 20px; /* Padding for better spacing */
+            border-radius: 5px; /* Rounded corners */
         }
 
+        /* Styling for labels */
         .team-select label {
-            color: white;
-            padding-right: 10px;
-            font-size: 16px;
+            color: white; /* Text color */
+            padding-right: 10px; /* Adds space between label and select box */
+            font-size: 16px; /* Sets a consistent font size */
         }
 
+        /* Styling for select dropdowns */
         .team-select select {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: none;
-            width: 100%; /* Takes full width on smaller screens */
+            padding: 10px; /* Padding inside the select box */
+            font-size: 16px; /* Ensures font size consistency */
+            border-radius: 5px; /* Rounded corners */
+            border: none; /* Removes default border */
         }
 
         /* Heat table spacing */
@@ -128,39 +127,7 @@ try {
             margin-bottom: 40px;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .match-header {
-                font-size: 16px;
-                padding: 8px 15px;
-            }
 
-            form {
-                gap: 10px; /* Reduce gap between elements */
-                padding: 5px; /* Reduce padding */
-            }
-
-            .team-select {
-                flex-direction: column; /* Stack label and select vertically */
-                align-items: flex-start; /* Align items to the start */
-            }
-
-            .team-select label {
-                padding-right: 0;
-                margin-bottom: 5px; /* Adds space between label and select */
-            }
-        }
-
-        @media (max-width: 480px) {
-            .match-header {
-                font-size: 14px;
-                padding: 6px 10px;
-            }
-
-            .team-select {
-                min-width: 200px; /* Further reduce minimum width */
-            }
-        }
     </style>
 </head>
 
@@ -202,42 +169,79 @@ foreach ($matchesByWeek as $weekHeader => $matches) {
     echo "<div class='match-header'><strong>$weekHeader</strong></div><br>";
     echo "<table class='heat-table'>";
     echo "<tr>
-            <th>Match ID</th>
             <th>Home Team</th>
             <th>Score (Projected)</th>
-            <th>Away Team</th>
             <th>Score (Projected)</th>
+            <th>Away Team</th>
           </tr>";
 
     foreach ($matches as $row) {
-        echo "<tr>";
+
 
         $matchID = $row['matchID'];
         $homeTeamName = $row['homeTeamName'];
         $awayTeamName = $row['awayTeamName'];
+        $homeTeamID=$row['homeTeamID'];
+        $awayTeamID=$row['awayTeamID'];
 
-        // Check if heat information exists
-        $heatInfoQuery = "
-        SELECT COUNT(*) 
-        FROM heatinformation 
-        WHERE matchID = :matchID
-        ";
+        // Query to get heatsInMatch
+        $nogameplayed = "SELECT heatsInMatch FROM matches WHERE matchID = :matchID";
+        $nogame = $pdo->prepare($nogameplayed);
+        $nogame->execute([':matchID' => $matchID]);
+        $nogameresult = $nogame->fetch(PDO::FETCH_ASSOC);
+
+        // Query to check the max heat number from heat information
+        $heatInfoQuery = "SELECT MAX(heatNumber) FROM heatinformation WHERE matchID = :matchID";
         $heatInfoStmt = $pdo->prepare($heatInfoQuery);
         $heatInfoStmt->execute([':matchID' => $matchID]);
         $heatInfoExists = $heatInfoStmt->fetchColumn();
 
         if ($heatInfoExists > 0) {
-            // Use heat information for the match
-            $homeScore = $row['homeTeamScore'] ?? 0;
-            $homeProjected = $row['homeTeamProjectedScore'] ?? 0;
-            $awayScore = $row['awayTeamScore'] ?? 0;
-            $awayProjected = $row['awayTeamProjectedScore'] ?? 0;
+            if ($nogameresult['heatsInMatch'] > $heatInfoExists) {
+                // Use future match projections if heatsInMatch is greater than the current heat number
+                $futureMatchQuery = "
+            SELECT 
+                homeTeamScore AS homeProjectedScore, 
+                awayTeamScore AS awayProjectedScore
+            FROM futurematches
+            WHERE matchID = :matchID
+        ";
+                $futureMatchStmt = $pdo->prepare($futureMatchQuery);
+                $futureMatchStmt->execute([':matchID' => $matchID]);
+                $futureMatchResult = $futureMatchStmt->fetch(PDO::FETCH_ASSOC);
 
-            echo "<td><a href='matchprofile.php?match={$matchID}'>{$matchID}</a></td>";
-            echo "<td>{$homeTeamName}</td>";
-            echo "<td>$homeScore({$homeProjected})</td>";
-            echo "<td>{$awayTeamName}</td>";
-            echo "<td>$awayScore({$awayProjected})</td>";
+                $homeProjected = $futureMatchResult['homeProjectedScore'] ?? 0;
+                $awayProjected = $futureMatchResult['awayProjectedScore'] ?? 0;
+
+                // Display match details using future projections
+                echo "<tr onclick=\"window.location.href='match.php?match={$matchID}'\" style='cursor: pointer;'>";
+                echo "<td>{$homeTeamName}</td>";
+                echo "<td>" . ($nogameresult['heatsInMatch'] == 0 ? "0" : "") .$row['homeTeamScore']. "({$homeProjected})</td>";
+                echo "<td>{$awayTeamName}</td>";
+                echo "<td>" . ($nogameresult['heatsInMatch'] == 0 ? "0" : "") .$row['awayTeamScore']. "({$awayProjected})</td>";
+            }else {// Use heat information for the match
+                $homeScore = $row['homeTeamScore'] ?? 0;
+                $homeProjected = $row['homeTeamProjectedScore'] ?? 0;
+                $awayScore = $row['awayTeamScore'] ?? 0;
+                $awayProjected = $row['awayTeamProjectedScore'] ?? 0;
+                echo "<tr onclick=\"window.location.href='matchprofile.php?match={$matchID}'\" style='cursor: pointer;'>";
+                echo "<td>{$homeTeamName}";?>
+                <source media="(min-width: 650px)" srcset="teamlogos/<?php echo file_exists("teamlogos/$homeTeamID.jpg") ? $homeTeamID : 0; ?>.jpg">
+                <img src="teamlogos/<?php echo file_exists("teamlogos/$homeTeamID.jpg") ? $homeTeamID : 0; ?>.jpg"
+                     style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
+            </picture></td>
+<?php
+                echo "<td>$homeScore({$homeProjected})</td>";
+                echo "<td>$awayScore({$awayProjected})</td>";
+                echo "<td>{$awayTeamName}";
+                ?>
+                <source media="(min-width: 650px)" srcset="teamlogos/<?php echo file_exists("teamlogos/$awayTeamID.jpg") ? $awayTeamID : 0; ?>.jpg">
+                <img src="teamlogos/<?php echo file_exists("teamlogos/$awayTeamID.jpg") ? $awayTeamID : 0; ?>.jpg"
+                     style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
+                </picture></td>
+                <?php
+
+            }
         } else {
             // No heat information, use futurematch projections or defaults
             $futureMatchQuery = "
@@ -251,20 +255,19 @@ foreach ($matchesByWeek as $weekHeader => $matches) {
             $futureMatchStmt->execute([':matchID' => $matchID]);
             $futureMatchResult = $futureMatchStmt->fetch(PDO::FETCH_ASSOC);
 
-            $nogameplayed="Select heatsInMatch from matches WHERE matchID = :matchID";
 
-            $nogame = $pdo->prepare($nogameplayed);
-            $nogame->execute([':matchID' => $matchID]);
-            $nogameresult = $nogame->fetch(PDO::FETCH_ASSOC);
 
 
 
             $homeProjected = $futureMatchResult['homeProjectedScore'] ?? 0;
             $awayProjected = $futureMatchResult['awayProjectedScore'] ?? 0;
-
-            echo "<td><a href='futurematchprofile.php?match={$matchID}'>{$matchID}</a></td>";
-            echo "<td>{$homeTeamName}</td>";
+            echo "<tr onclick=\"window.location.href='match.php?match={$matchID}'\" style='cursor: pointer;'>";
+            echo "<td>{$homeTeamName}";
             ?>
+                <source media="(min-width: 650px)" srcset="teamlogos/<?php echo file_exists("teamlogos/$homeTeamID.jpg") ? $homeTeamID : 0; ?>.jpg">
+                <img src="teamlogos/<?php echo file_exists("teamlogos/$homeTeamID.jpg") ? $homeTeamID : 0; ?>.jpg"
+                     style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
+                </picture></td>
             <td>
 <?php
 if($nogameresult['heatsInMatch']==0)
@@ -272,17 +275,22 @@ if($nogameresult['heatsInMatch']==0)
     echo "0";
 }
 echo "(".$homeProjected.")";
-?></td><?php
-            echo "<td>{$awayTeamName}</td>";
+?></td><td>
+            <?php
+            if($nogameresult['heatsInMatch']==0)
+            {
+                echo "0";
+            }
+            echo "(".$awayProjected.")";
+            ?></td><?php
+
+            echo "<td>{$awayTeamName}";
             ?>
-             <td>
-<?php
-if($nogameresult['heatsInMatch']==0)
-{
-    echo "0";
-}
-echo "(".$awayProjected.")";
-?></td><?php
+            <source media="(min-width: 650px)" srcset="teamlogos/<?php echo file_exists("teamlogos/$awayTeamID.jpg") ? $awayTeamID : 0; ?>.jpg">
+            <img src="teamlogos/<?php echo file_exists("teamlogos/$awayTeamID.jpg") ? $awayTeamID : 0; ?>.jpg"
+                 style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
+            </picture></td>
+            <?php
         }
 
         // Display the match information

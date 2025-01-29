@@ -35,77 +35,22 @@ if (count($players) >= 4) {
     <title>Main</title>
     <link rel="stylesheet" href="includes/tableStyle.css">
     <link rel="stylesheet" href="includes/headerStyle.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; }
+        body { font-family: Arial, sans-serif;
+            .chart-container {
+                width: 20%;
+                margin: auto;
+            }}
     </style>
 </head>
 <body>
 <h1>Zuzel Elo</h1>
 <h2>Random Race</h2>
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Elo Rating</th>
-        <th>Win Probability (%)</th>
-        <th>Expected Points</th>
-    </tr>
+
     <?php
     // Helper functions
-    function calculateRankedProbabilities($ratings) {
-        $n = count($ratings);
-        $players = array_keys($ratings);
-        $pairwiseProbabilities = [];
 
-        foreach ($ratings as $playerA => $ratingA) {
-            foreach ($ratings as $playerB => $ratingB) {
-                $pairwiseProbabilities[$playerA][$playerB] = $playerA === $playerB ? 0.5 : 1 / (1 + pow(10, ($ratingB - $ratingA) / 1600));
-            }
-        }
-
-        $permutations = generatePermutations($players);
-        $positionProbabilities = [];
-
-        foreach ($players as $player) {
-            $positionProbabilities[$player] = array_fill(0, $n, 0);
-        }
-
-        foreach ($permutations as $permutation) {
-            $probability = 1;
-            for ($i = 0; $i < $n; $i++) {
-                for ($j = $i + 1; $j < $n; $j++) {
-                    $probability *= $pairwiseProbabilities[$permutation[$i]][$permutation[$j]];
-                }
-            }
-
-            for ($i = 0; $i < $n; $i++) {
-                $positionProbabilities[$permutation[$i]][$i] += $probability;
-            }
-        }
-
-        foreach ($positionProbabilities as $player => &$probabilities) {
-            $total = array_sum($probabilities);
-            if ($total > 0) {
-                $probabilities = array_map(fn($p) => $p / $total, $probabilities);
-            }
-        }
-
-        return $positionProbabilities;
-    }
-
-    function generatePermutations($items) {
-        if (count($items) === 1) {
-            return [$items];
-        }
-
-        $permutations = [];
-        foreach ($items as $index => $item) {
-            $remainingItems = array_merge(array_slice($items, 0, $index), array_slice($items, $index + 1));
-            foreach (generatePermutations($remainingItems) as $permutation) {
-                $permutations[] = array_merge([$item], $permutation);
-            }
-        }
-        return $permutations;
-    }
 
     $ratings = [];
     foreach ($selectedPlayers as $index => $player) {
@@ -113,26 +58,155 @@ if (count($players) >= 4) {
     }
 
     $probabilities = calculateRankedProbabilities($ratings);
+    ?>
 
-    foreach ($selectedPlayers as $index => $player) {
-        $playerProbabilities = $probabilities[$index + 1] ?? [];
-        $expectedPoints = 0;
-        for ($i = 0; $i < 4; $i++) {
-            $expectedPoints += ($playerProbabilities[$i] ?? 0) * (3 - $i);
+    <div class="chart-container">
+        <canvas id="winChart"></canvas>
+    </div>
+        <?php
+        $chartData = [];
+        $colors = ['#FF0000', '#0000FF', '#FFFFFF', '#FFFF00'];
+        // Initialize arrays to store player data
+        // Initialize arrays to store player data
+        $players = [];
+        $winProbabilities = [];
+        $expectedPoints = [];
+
+        // Collect data for chart and table
+        foreach ($selectedPlayers as $index => $player) {
+            $winProbability = round(($probabilities[$index + 1][0] ?? 0) * 100, 2);
+            $expectedPointsValue = 0;
+
+            for ($i = 0; $i < 4; $i++) {
+                $expectedPointsValue += ($probabilities[$index + 1][$i] ?? 0) * (3 - $i);
+            }
+
+            // Store data for each player
+            $players[] = $player['FirstName'] . ' ' . $player['LastName'];
+            $winProbabilities[] = $winProbability;
+            $expectedPoints[] = round($expectedPointsValue, 2);
+
+            $playerID = $player['PlayerID'];
+
+            // Collect chart data (with players as columns)
+            $chartData[] = [
+                'label' => $player['FirstName'] . ' ' . $player['LastName'],
+                'probability' => $winProbability,
+                'expectedPoints' => round($expectedPointsValue, 2),
+                'color' => $colors[$index] ?? '#CCCCCC'
+            ];
         }
 
-        echo "<tr>";
-        ?>
-    <td><a href="profile.php?id=<?php echo $player['PlayerID']; ?>">
-            <?php echo $player['FirstName'] . ' ' . $player['LastName']; ?></a></td>
-            <?php
-        echo "<td>" . htmlspecialchars($player['Elo']) . "</td>";
-        echo "<td>" . round(($playerProbabilities[0] ?? 0) * 100, 2) . "%</td>";
-        echo "<td>" . round($expectedPoints, 2) . "</td>";
-        echo "</tr>";
-    }
-    echo "</table>";
+        // Table Layout
+        echo "<table>";
+        echo "<thead><tr><th></th>";  // First column for labels
+        foreach ($selectedPlayers as $index => $player) {
+            $playerID = $player['PlayerID'];
 
+            // Debugging: Ensure playerID is correct
+            // echo "Player ID: $playerID<br>";
+
+            echo "<th>" . $player['FirstName'] . ' ' . $player['LastName'] . "";
+
+            ?>
+            <picture style="display: flex; justify-content: center; align-items: center;">
+                <source media="(min-width: 650px)" srcset="playerlogos/<?php echo file_exists("playerlogos/$playerID.jpg") ? $playerID : 0; ?>.jpg">
+                <img src="playerlogos/<?php echo file_exists("playerlogos/$playerID.jpg") ? $playerID : 0; ?>.jpg"
+                     style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
+            </picture></th>
+            <?php
+        }
+        echo "</tr></thead><tbody>";
+
+        // Create rows for each data point (Name, Picture, Elo, Expected Points)
+        $labels = ['Elo', 'Expected Points'];
+
+        foreach ($labels as $label) {
+            echo "<tr><td>$label</td>";  // Display label in the first column
+            foreach ($selectedPlayers as $index => $player) {
+                switch ($label) {
+                    case 'Elo':
+                        // Output the player's Elo
+                        echo "<td>" . htmlspecialchars($player['Elo']) . "</td>";
+                        break;
+                    case 'Expected Points':
+                        // Output the player's expected points
+                        $expectedPointsValue = $expectedPoints[$index] ?? '-';
+                        echo "<td>" . round($expectedPointsValue, 2) . "</td>";
+                        break;
+                }
+            }
+            echo "</tr>";
+        }
+        echo "</tbody></table>";
+?>
+
+
+    <script>
+        const chartData = <?php echo json_encode($chartData); ?>;
+        const labels = chartData.map(player => player.label);
+        const probabilities = chartData.map(player => player.probability);
+        const colors = chartData.map(player => player.color);
+        const ctx = document.getElementById('winChart').getContext('2d');
+
+        const winChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: probabilities,
+                    backgroundColor: colors,
+                    hoverOffset: 10,
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '30%',
+                rotation: -90,
+                circumference: 180,
+                aspectRatio: 2,  // Adjust this value to create the oval effect
+                plugins: {
+                    legend: {
+                        display: false // Remove the legend
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 0, // Remove any extra padding from the top
+                        left: 0,
+                        right: 0,
+                        bottom: 0
+                    }
+                }
+            }
+        });
+
+
+        document.querySelectorAll('tr[data-index]').forEach(row => {
+            row.addEventListener('mouseover', function() {
+                let index = this.getAttribute('data-index');
+
+                // Trigger the tooltip and highlight the section
+                winChart.tooltip.setActiveElements([{
+                    datasetIndex: 0,
+                    index: index
+                }], {x: 0, y: 0});  // You can adjust the position if needed
+
+                // Update the chart to show the tooltip and highlight the section
+                winChart.update();
+            });
+
+            row.addEventListener('mouseout', function() {
+                // Hide the tooltip when the mouse leaves the row
+                winChart.tooltip.setActiveElements([], {x: 0, y: 0});
+                winChart.update();
+            });
+        });
+
+
+
+    </script>
+<?php
     // Fetch a random row to get its matchID and heatNumber
     $randomRowQuery = "SELECT `matchID`, `heatNumber` FROM `heatinformation` ORDER BY RAND() LIMIT 1";
     $result = $conn->query($randomRowQuery);
@@ -205,3 +279,61 @@ Heat Number: $heatNumber</h2>";
     ?>
 </body>
 </html>
+
+<?php
+function calculateRankedProbabilities($ratings) {
+    $n = count($ratings);
+    $players = array_keys($ratings);
+    $pairwiseProbabilities = [];
+
+    foreach ($ratings as $playerA => $ratingA) {
+        foreach ($ratings as $playerB => $ratingB) {
+            $pairwiseProbabilities[$playerA][$playerB] = $playerA === $playerB ? 0.5 : 1 / (1 + pow(10, ($ratingB - $ratingA) / 1600));
+        }
+    }
+
+    $permutations = generatePermutations($players);
+    $positionProbabilities = [];
+
+    foreach ($players as $player) {
+        $positionProbabilities[$player] = array_fill(0, $n, 0);
+    }
+
+    foreach ($permutations as $permutation) {
+        $probability = 1;
+        for ($i = 0; $i < $n; $i++) {
+            for ($j = $i + 1; $j < $n; $j++) {
+                $probability *= $pairwiseProbabilities[$permutation[$i]][$permutation[$j]];
+            }
+        }
+
+        for ($i = 0; $i < $n; $i++) {
+            $positionProbabilities[$permutation[$i]][$i] += $probability;
+        }
+    }
+
+    foreach ($positionProbabilities as $player => &$probabilities) {
+        $total = array_sum($probabilities);
+        if ($total > 0) {
+            $probabilities = array_map(fn($p) => $p / $total, $probabilities);
+        }
+    }
+
+    return $positionProbabilities;
+}
+
+function generatePermutations($items) {
+    if (count($items) === 1) {
+        return [$items];
+    }
+
+    $permutations = [];
+    foreach ($items as $index => $item) {
+        $remainingItems = array_merge(array_slice($items, 0, $index), array_slice($items, $index + 1));
+        foreach (generatePermutations($remainingItems) as $permutation) {
+            $permutations[] = array_merge([$item], $permutation);
+        }
+    }
+    return $permutations;
+}
+?>

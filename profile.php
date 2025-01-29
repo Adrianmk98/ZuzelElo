@@ -10,7 +10,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 }
 
 // Fetch player information
-$sql_player = "SELECT FirstName, LastName, elo, teamID FROM player WHERE PlayerID = ?";
+$sql_player = "SELECT FirstName, LastName, elo,YoB,DoB,BirthCountryID,countryID, teamID FROM player WHERE PlayerID = ?";
 $stmt_player = $conn->prepare($sql_player);
 $stmt_player->bind_param("i", $player_id);
 $stmt_player->execute();
@@ -84,7 +84,7 @@ SELECT SUM(h.PPO) as PPO, SUM(h.PPA) as PPA,COUNT(DISTINCT h.matchID) AS gamesPl
 FROM heatinformation h
 JOIN matches m ON h.matchID = m.matchID
 WHERE h.playerID = ?
-AND m.yearNum = 2024;
+AND m.yearNum =2025;
 ";
 
 $stmt_asplayer = $conn->prepare($AdvancedAnalytics);
@@ -109,6 +109,10 @@ if ($result_player->num_rows > 0) {
     $last_name = $player['LastName'];
     $elo = $player['elo'];
     $team_id = $player['teamID'];
+    $YoB=$player['YoB'];
+    $DoB=$player['DoB'];
+    $BirthCountryID=$player['BirthCountryID'];
+    $countryID=$player['countryID'];
 } else {
     die("Player not found.");
 }
@@ -180,11 +184,103 @@ if ($result_team->num_rows > 0) {
             border: none; /* Removes default border */
         }
 
+        .wikitable {
+            width: 100%;
+            max-width: 400px; /* Adjust width as needed */
+            border: 1px solid #a2a9b1;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background-color: #f8f9fa;
+        }
+
+        .wikitable th, .wikitable td {
+            border: 1px solid #a2a9b1;
+            padding: 6px 10px;
+            text-align: left;
+        }
+
+        .wikitable th {
+            background-color: #d6d8da;
+            font-weight: bold;
+        }
+
+        .wikitable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
     </style>
 </head>
 <body>
+
+
 <h1><?php echo htmlspecialchars($first_name); ?> <?php echo htmlspecialchars($last_name); ?></h1>
+
 <div class="profile-container">
+    <picture style="display: flex; justify-content: center; align-items: center;">
+        <source media="(min-width: 650px)" srcset="playerlogos/<?php echo file_exists("playerlogos/$player_id.jpg") ? $player_id : 0; ?>.jpg">
+        <img src="playerlogos/<?php echo file_exists("playerlogos/$player_id.jpg") ? $player_id : 0; ?>.jpg"
+             style="max-width: 300px; max-height: 300px; width: auto; height: auto; display: block; margin: 0 auto;">
+    </picture>
+
+<h3>Biography</h3>
+    <table class="wikitable">
+        <tr>
+            <th>Born</th>
+            <td>
+                <?php
+                if (!empty($DoB) && $DoB !== "0000-00-00") {
+                    $birthDate = new DateTime($DoB);
+                    $currentDate = new DateTime();
+                    $age = $currentDate->diff($birthDate)->y;
+                    echo $DoB . " (age " . $age . ")";
+                } else {
+                    echo "Turning " . (date("Y") - $YoB);
+                }
+                ?>
+            </td>
+
+        </tr>
+        <tr>
+            <th>Country of Birth</th>
+            <td>
+                <?php
+                if (!empty($BirthCountryID) && $BirthCountryID !== "0") {
+
+                    $sql_country = "SELECT countryName FROM countries WHERE countryID = ?";
+                    $stmt_country = $conn->prepare($sql_country);
+                    $stmt_country->bind_param("i", $BirthCountryID);
+                    $stmt_country->execute();
+                    $result_country = $stmt_country->get_result();
+                    $country = $result_country->fetch_assoc();
+                    echo $country['countryName'];
+                } else {
+                    echo "Unknown";
+                }
+                ?>
+            </td>
+        </tr>
+        <tr>
+            <th>Nationality</th>
+            <td>
+                <?php
+                if (!empty($BirthCountryID) && $BirthCountryID !== "0") {
+
+                    $sql_country = "SELECT countryName FROM countries WHERE countryID = ?";
+                    $stmt_country = $conn->prepare($sql_country);
+                    $stmt_country->bind_param("i", $countryID);
+                    $stmt_country->execute();
+                    $result_country = $stmt_country->get_result();
+                    $country = $result_country->fetch_assoc();
+                    echo $country['countryName'];
+                } else {
+                    echo "Unknown";
+                }
+                ?>
+            </td>
+        </tr>
+    </table>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <?php
     // Dynamically build the SELECT query for columns 1–20

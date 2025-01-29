@@ -1,4 +1,5 @@
 <?php
+//LOADED FROM matchprofileloader
 function calculatePlayerStats($playerIDs, $eloRatings, $hometeamID, $ctID, $heatnum, $matchID, $pdo, $weeknum, $yearnum, $iterations = 10000, $k = 16) {
     if (count($playerIDs) !== 4 || count($eloRatings) !== 4) {
         throw new Exception("Exactly 4 player IDs and Elo ratings are required.");
@@ -100,39 +101,6 @@ function calculatePlayerStats($playerIDs, $eloRatings, $hometeamID, $ctID, $heat
             }
         }
 
-        #$stmt = $pdo->prepare("
-    #SELECT
-    #    SUM(score) AS total_score,
-   #     SUM(projectedPoints) AS total_projected_points
-   # FROM heatinformation
-   # WHERE
-   #     currentplayerteamID = :teamID
-    #    AND matchID < :matchID
-   #     AND matchID IN (SELECT matchID FROM matches WHERE yearnum = :yearnum)
-#");
-
- #       $stmt->execute([
-   #         ':teamID' => $ctID[$index],
-   #         ':matchID' => $matchID,
-    #        ':yearnum' => $yearnum,
-    #    ]);
-
-     #   $result = $stmt->fetch(PDO::FETCH_ASSOC);
-     #   $totalScore = $result['total_score'];
-     #   $totalProjectedPoints = $result['total_projected_points'];
-     #   if($totalScore>0)
-     #   {
-
-      #      $teamRatio=$totalScore/$totalProjectedPoints;
-      #      echo "DEBUG: totalScore and totalProjected:".$teamRatio." ".$totalScore.":".$totalProjectedPoints."<br>";
-      #      echo "DEBUG: Adjusted Elo (before teamRatio): {$adjustedEloRatings[$index]}<br>";
-      #      $adjustedEloRatings[$index] *=$teamRatio;
-      #  }
-
-
-
-
-     #   echo "DEBUG: Adjusted Elo (before home/away): {$adjustedEloRatings[$index]}<br>";
 
         if ($hometeamID === $ctID[$index]) {
             $adjustedEloRatings[$index] *= 1.05; // Home team advantage

@@ -80,8 +80,13 @@
 
             echo "<tr>
             <td>" . $player['playerMatchNum'] . "</td>
-            <td>" . htmlspecialchars($player['firstName'] . ' ' . $player['lastName']) . "</td>
-            <td>" . htmlspecialchars($player['Score']);
+            <td>";?>
+            <a href="profile.php?id=<?php echo $player['playerID']; ?>">
+                            <?php echo $player['firstName'] . ' ' . $player['lastName']; ?>
+    </a></td>
+    <?php
+
+            echo "<td>" . htmlspecialchars($player['Score']);
             if ($player['Bonus']) {
                 echo "<sup>+" . htmlspecialchars($player['Bonus']) . "</sup>";
             }

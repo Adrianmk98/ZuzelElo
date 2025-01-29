@@ -28,6 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['team_1']) && isset($_POST['team_2'])) {
         $selected_team_1 = $_POST['team_1'];
         $selected_team_2 = $_POST['team_2'];
+        $hometeamID=$selected_team_1;
+        $awayteamID=$selected_team_2;
 
         // Fetch players from Team 1
         $stmt = $pdo->prepare("SELECT PlayerID, FirstName, lastName,Elo FROM player WHERE teamID = ?");
@@ -158,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($matchNumberMap as $heat => &$slots) {
             echo "<h2>Heat $heat:</h2>";
             echo "<table border='1' style='background-color: #fff;'>";
-            echo "<tr><th>Slot</th><th>Player</th><th>Projected Points</th><th>Win Chance</th><th>2nd Place Probability</th><th>3rd Place Probability</th><th>4th Place Probability</th><th>Simulated Points</th></tr>";
+            echo "<tr><th>Slot</th><th>Player</th><th>Simulated Points</th><th>Projected Points</th><th>Win Chance</th><th>2nd Place Probability</th><th>3rd Place Probability</th><th>4th Place Probability</th></tr>";
 
             // Get Elo ratings for players in this heat
             $playerIDs = [];
@@ -233,6 +235,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<tr style='$goldStyle'>";
                 echo "<td>$slot</td>";
                 echo "<td>" . $player['FirstName'] . " " . $player['lastName'] . "</td>";
+                if ($singlePlayerResults['projected_points'] == 3) {
+                    echo "<td style='background: gold'>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
+                } else {
+                    echo "<td>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
+                }
                 echo "<td>" . round($playerResults['projected_points'], 2) . "</td>";
                 echo "<td>" . round($playerResults['win_chance'] * 100, 2) . "%</td>";
                 echo "<td>" . round($playerResults['finishing_probs'][1] * 100, 2) . "%</td>";
@@ -240,12 +247,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<td>" . round($playerResults['finishing_probs'][3] * 100, 2) . "%</td>";
 
 // For the points column, keep the conditional formatting
-                if ($singlePlayerResults['projected_points'] == 3) {
-                    echo "<td style='background: gold'>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
-                } else {
-                    echo "<td>" . round($singlePlayerResults['projected_points'], 2) . "</td>";
-                }
-
                 echo "</tr>";
 
                 // Initialize player data if not already set
@@ -373,7 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         //include 'FutureMatchPlayerPPOtable.php';
         $content = ob_get_clean();
-        include 'futurematchTeamScoreBreakdownTable.php';
+        include 'matchsimulatorScoreTable.php';
         echo $content;
 ?><?php
     }
