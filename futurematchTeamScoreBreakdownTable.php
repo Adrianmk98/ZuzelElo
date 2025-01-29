@@ -75,62 +75,66 @@
 <div class="team-tables">
     <?php
 
-    // Group players by team
-    $playersByTeam = [];
-    foreach ($playerPPOData as $player) {
-        $playersByTeam[$player['teamName']][] = $player;
+// Group players by team
+$playersByTeam = [];
+foreach ($playerPPOData as $player) {
+    $playersByTeam[$player['teamID']][] = $player;
+}
+
+
+foreach ($playersByTeam as $teamID => $players) {
+    $teamID = trim((string)$teamID); // Ensure consistent type and trim whitespace
+
+    $teamClass = '';  // Reset class
+    $teamPrefix = ''; // Reset prefix
+
+    if ($teamID === $hometeamID) {
+        $teamClass = 'home-team';
+        $teamPrefix = 'H-';
+    } elseif ($teamID === $awayteamID) {
+        $teamClass = 'away-team';
+        $teamPrefix = 'A-';
+    } else {
+        // If the team doesn't match either home or away, skip rendering
+        continue;
     }
 
-    // Generate tables for each team
-    foreach ($playersByTeam as $teamName => $players) {
-        $teamID = $players[0]['teamID'];
-        $teamClass = '';
-        $teamPrefix = '';  // Variable to hold prefix for team name
-        if ($teamID == $hometeamID) {
-            $teamClass = 'home-team'; // Class for home team
-            $teamPrefix = 'H-';       // Prefix for home team
-        } elseif ($teamID == $awayteamID) {
-            $teamClass = 'away-team'; // Class for away team
-            $teamPrefix = 'A-';       // Prefix for away team
+    echo "<div class='team-table $teamClass'>";  // Add home-team or away-team class
+    echo "<h2>" . htmlspecialchars($teamPrefix . $players[0]['teamName']) . " (" . $cumulativeTeamPoints[$teamID] . ")</h2>";
+    echo "<table>
+    <thead>
+    <tr>
+        <th>Player</th>
+        <th>Total Score</th>
+        <th>Point Breakdown</th>
+    </tr>
+    </thead>
+    <tbody>";
+
+    foreach ($players as $player) {
+        $playerID = $player['playerID'];
+        $pointBreakdown = "N/A";
+        if (!empty($player['pointBreakdown'])) {
+            $pointBreakdown = implode(' , ', $player['pointBreakdown']);
         }
 
-        echo "<div class='team-table $teamClass'>";  // Add home-team or away-team class
-        echo "<h2>" . htmlspecialchars($teamPrefix . $teamName) . " (" . $cumulativeSingleTeamPoints[$teamID] .")</h2>";
-        echo "<table>
-        <thead>
-        <tr>
-            <th>Player</th>
-            <th>Total Score</th>
-            <th>Point Breakdown</th>
-        </tr>
-        </thead>
-        <tbody>";
-
-        foreach ($players as $player) {
-            $playerID = $player['playerID'];
-            $pointBreakdown = "N/A";
-            foreach ($playerPPOData as $playerData) {
-                if ($playerData['playerID'] == $playerID) {
-                    $pointBreakdown = implode(' , ', $playerData['pointBreakdown']);
-                    break;
-                }
-            }
-
-            echo "<tr>
-            <td>" . htmlspecialchars($player['firstName'] . ' ' . $player['lastName']). "</td>
-            <td>" . htmlspecialchars($player['Score']);
-            if ($player['Bonus']) {
-                echo "<sup>+" . htmlspecialchars($player['Bonus']) . "</sup>";
-            }
-            echo "</td>
-            <td>(" . htmlspecialchars($pointBreakdown) . ")</td>
-        </tr>";
+        echo "<tr>
+        <td>" . htmlspecialchars($player['firstName'] . ' ' . $player['lastName']) . "</td>
+        <td>" . htmlspecialchars($player['Score']);
+        if ($player['Bonus']) {
+            echo "<sup>+" . htmlspecialchars($player['Bonus']) . "</sup>";
         }
-
-        echo "</tbody>
-    </table>";
-        echo "</div>"; // Close team-table
+        echo "</td>
+        <td>(" . htmlspecialchars($pointBreakdown) . ")</td>
+    </tr>";
     }
+
+    echo "</tbody>
+</table>";
+    echo "</div>"; // Close team-table
+}
+?>
+
     ?>
 </div>
 </html>
