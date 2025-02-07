@@ -95,7 +95,7 @@ $conn->close();
                 <?php foreach ($team['players'] as $player): ?>
                     <div class="player">
                         <a href="profile.php?id=<?php echo $player['PlayerID']; ?>">
-                            <?php echo $player['FirstName'] . ' ' . $player['LastName']; ?>
+                            <?php echo $player['FirstName'] . '<br>' . $player['LastName']; ?>
                         </a>
                     </div>
                 <?php endforeach; ?>
