@@ -30,7 +30,6 @@ $conn->close();
     <link rel="stylesheet" href="includes/raceSimulatorStyle.css">
     <script>
         // JavaScript to update player details when a player is selected from dropdown
-        // JavaScript to update player details when a player is selected from dropdown
 function updatePlayerDetails(playerId, playerIndex) {
     const players = <?php echo json_encode($players); ?>; // Get player data as a JavaScript object
 
@@ -58,48 +57,31 @@ function updatePlayerDetails(playerId, playerIndex) {
         <table>
             <tr>
                 <th>Player</th>
-                <?php
-                for ($i = 1; $i <= 4; $i++) {
-                    if($i==1){
-                    echo"<th>🟥 Player $i</th>";}
-                    elseif($i==2){
-                    echo"<th>🟦 Player $i</th>";}
-                    elseif($i==3){
-                    echo"<th>⬜ Player $i</th>";}
-                    elseif($i==4){
-                    echo"<th>🟨 Player $i</th>";}
-                    else{
-                    echo"<th>Player $i</th>";}
-                }
-                ?>
-            </tr>
-            <tr>
                 <th>Name</th>
-                <?php
-    for ($i = 1; $i <= 4; $i++) {
-        echo "<td>
-                <select name='player_$i' id='player_$i' onchange='updatePlayerDetails(this.value, $i)'>
-                    <option value=''>Select Player</option>";
-        foreach ($players as $player) {
-            echo "<option value='" . $player['PlayerID'] . "'>" . $player['FirstName'] . " " . $player['LastName'] . "</option>";
-        }
-        echo "</select>
-              </td>";
-    }
-    ?>
-            </tr>
-            <tr>
                 <th>Rating</th>
-                <?php
-                for ($i = 1; $i <= 4; $i++) {
-                    echo "<td><input type='number' name='elo_$i' id='elo$i'></td>";
-                }
-                ?>
             </tr>
+            <?php
+            for ($i = 1; $i <= 4; $i++) {
+                // Assign color icons based on the player number
+                $colorIcons = ["🟥", "🟦", "⬜", "🟨"];
+                $icon = $colorIcons[$i - 1] ?? ""; // Default to empty if out of range
+
+                echo "<tr>
+                <td>$icon Player $i</td>
+                <td>
+                    <select name='player_$i' id='player_$i' onchange='updatePlayerDetails(this.value, $i)'>
+                        <option value=''>Select Player</option>";
+                foreach ($players as $player) {
+                    echo "<option value='" . $player['PlayerID'] . "'>" . $player['FirstName'] . " " . $player['LastName'] . "</option>";
+                }
+                echo "      </select>
+                </td>
+                <td><input type='number' name='elo_$i' id='elo$i'></td>
+              </tr>";
+            }
+            ?>
         </table>
 
-
-    </form>
 
     <?php
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
