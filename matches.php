@@ -231,8 +231,8 @@ foreach ($matchesByWeek as $weekHeader => $matches) {
                      style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
             </picture></td>
 <?php
-                echo "<td>$homeScore({$homeProjected})</td>";
-                echo "<td>$awayScore({$awayProjected})</td>";
+                echo "<td><b>$homeScore</b>({$homeProjected})</td>";
+                echo "<td><b>$awayScore</b>({$awayProjected})</td>";
                 echo "<td>{$awayTeamName}";
                 ?>
                 <source media="(min-width: 650px)" srcset="teamlogos/<?php echo file_exists("teamlogos/$awayTeamID.jpg") ? $awayTeamID : 0; ?>.jpg">
