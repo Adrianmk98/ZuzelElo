@@ -119,7 +119,7 @@
 
     <a href="teams.php">Teams</a>
     <a href="tabela.php">Standings</a>
-    <a href="record.php">Record</a>
+    <a href="matchupHistory.php">History</a>
     <a href="math.php">Math</a>
 
     </a>
