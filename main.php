@@ -42,6 +42,9 @@ if (count($players) >= 4) {
                 width: 20%;
                 margin: auto;
             }}
+        td:hover {
+            background-color: rgba(0, 0, 0, 0.1); /* Light background on row hover */
+        }
     </style>
 </head>
 <body>
@@ -99,6 +102,7 @@ if (count($players) >= 4) {
 
         // Table Layout
         echo "<table>";
+
         echo "<thead><tr><th></th>";  // First column for labels
         foreach ($selectedPlayers as $index => $player) {
             $playerID = $player['PlayerID'];
@@ -106,7 +110,8 @@ if (count($players) >= 4) {
             // Debugging: Ensure playerID is correct
             // echo "Player ID: $playerID<br>";
 
-            echo "<th>" . $player['FirstName'] . ' ' . $player['LastName'] . "";
+            echo "<th onclick=\"window.location.href='profile.php?id={$playerID}'\" style='cursor: pointer;'>" . $player['FirstName'] . ' ' . $player['LastName'] . "";
+
 
             ?>
             <picture style="display: flex; justify-content: center; align-items: center;">
@@ -127,12 +132,12 @@ if (count($players) >= 4) {
                 switch ($label) {
                     case 'Elo':
                         // Output the player's Elo
-                        echo "<td>" . htmlspecialchars($player['Elo']) . "</td>";
+                        echo "<td onclick=\"window.location.href='profile.php?id={$player['PlayerID']}'\" style='cursor: pointer;'>" . htmlspecialchars($player['Elo']) . "</td>";
                         break;
                     case 'Expected Points':
                         // Output the player's expected points
                         $expectedPointsValue = $expectedPoints[$index] ?? '-';
-                        echo "<td>" . round($expectedPointsValue, 2) . "</td>";
+                        echo "<td onclick=\"window.location.href='profile.php?id={$player['PlayerID']}'\" style='cursor: pointer;'>" . round($expectedPointsValue, 2) . "</td>";
                         break;
                 }
             }
