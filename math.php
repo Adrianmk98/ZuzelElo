@@ -150,7 +150,15 @@ include 'includes/topbar.php';
 
     <div class="card">
         <h2>Monte Carlo Simulation</h2>
-        <p>Monte Carlo simulations involve running multiple trials to estimate outcomes. For example:</p>
+        <p>Monte Carlo simulations involve running multiple trials to estimate outcomes. The general process follows these steps:</p>
+        <ol>
+            <li>Assign each player a probability of success based on their Elo rating.</li>
+            <li>Simulate multiple matchups by generating random values weighted by those probabilities.</li>
+            <li>Determine finishing positions and expected scores.</li>
+            <li>Adjust Elo ratings based on actual vs. expected performance.</li>
+            <li>Repeat for a large number of iterations to get statistical probabilities.</li>
+        </ol>
+        <p>Example formula for expected points after multiple trials:</p>
         <p><code>average_result = \frac{\sum trials}{total_trials}</code></p>
     </div>
 
@@ -173,6 +181,39 @@ include 'includes/topbar.php';
         <ul>
             <li> is LeagueAverageScore</li>
             <li>LAS for that particular player in the consists of all players for Seniors and only for Youth Players among Youth players but with the player replaced with the average player</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Yearly Age Elo Changes</h2>
+        <p>The gain/drop in Elo is calculated with the following formula:</p>
+        <p><code>P_A' = P_A-(P_A-1500)*(1-(5+(Age-25)))</code></p>
+        <p>Where:</p>
+        <ul>
+            <li> Age player is turning is over 25</li>
+            <li>Player Elo is over 1500</li>
+        </ul>
+        <p><code>P_A' = P_A-(P_A-1500)*(1-(5+(Age-25)))</code></p>
+        <p>Where:</p>
+        <ul>
+            <li> Age player is turning is over 25</li>
+            <li>Player Elo is over 1500</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Addition of New Players</h2>
+        <p>New Players are added with the following Elo ratings:</p>
+        <p><code>(SPR*1000)*0.75</code></p>
+        <p>Where:</p>
+        <ul>
+            <li> Player does not meet other criteria and has experience in other league</li>
+            <li>SPR is Score per race in the prior senior league</li>
+        </ul>
+        <p><code>1000</code></p>
+        <p>Where:</p>
+        <ul>
+            <li> Player is under age of 21</li>
         </ul>
     </div>
 
