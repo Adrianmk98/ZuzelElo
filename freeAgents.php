@@ -3,7 +3,11 @@ include 'includes/sqlCall.php';
 include 'includes/topbar.php';
 
 
-// Fetch teams and their players from the database
+/*
+ * Fetch information for the players from the player table but only if their teamID is 0.
+ * Players with teamID=0 means they are not currently in the league.
+ * Left Join exists so that we can get the team name without having to do another query.
+ */
 $sql = "SELECT p.PlayerID, p.FirstName, p.LastName, p.TeamID, t.teamName,p.Elo 
         FROM player p
         LEFT JOIN team t ON p.TeamID = t.TeamID
