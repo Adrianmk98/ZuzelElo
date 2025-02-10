@@ -985,27 +985,7 @@ $matchNumberMap = [
 
         }
 
-// Add SQL query to update the futurematches table
-        $homeTeamScore = $cumulativeTeamPoints[$hometeamID] ?? 0;
-        $awayTeamScore = $cumulativeTeamPoints[$awayteamID] ?? 0;
 
-        $updatefuturematchScores = "
-    INSERT INTO futurematches (matchID, hometeamID, awayteamID, homeTeamScore, awayTeamScore)
-    VALUES (:matchID, :hometeamID, :awayteamID, :homeTeamScore, :awayTeamScore)
-    ON DUPLICATE KEY UPDATE 
-        homeTeamScore = :homeTeamScore, 
-        awayTeamScore = :awayTeamScore
-";
-
-// Use PDO to prepare and execute the query securely
-        $stmt = $pdo->prepare($updatefuturematchScores);
-        $stmt->execute([
-            ':matchID' => $match_id,
-            ':hometeamID' => $hometeamID,
-            ':awayteamID' => $awayteamID,
-            ':homeTeamScore' => $homeTeamScore,
-            ':awayTeamScore' => $awayTeamScore,
-        ]);
 
 // Include any additional scripts or cleanup
 // include 'FutureMatchPlayerPPOtable.php';
