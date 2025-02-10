@@ -42,7 +42,7 @@ try {
     LEFT JOIN team ht ON m.homeTeamID = ht.teamID
     LEFT JOIN team at ON m.awayTeamID = at.teamID
     WHERE m.yearnum=$yearID
-    ORDER BY m.yearnum, m.weeknum;"; // Grouping and sorting by year and week
+    ORDER BY m.yearnum, m.weeknum,m.matchID;"; // Grouping and sorting by year and week
 
     // Execute the query
     $stmt = $pdo->query($match_details_query);
