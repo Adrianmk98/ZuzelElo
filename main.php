@@ -2,7 +2,10 @@
 include 'includes/sqlCall.php';
 include 'includes/topbar.php';
 
-// Fetch players from the database
+// Fetch players from the database.
+/*
+ * Gets random players from database
+ */
 $sql = "SELECT PlayerID, FirstName, LastName, Elo FROM player";  // Assuming you have a 'player' table
 $result = $conn->query($sql);
 
@@ -69,7 +72,6 @@ if (count($players) >= 4) {
         <?php
         $chartData = [];
         $colors = ['#FF0000', '#0000FF', '#FFFFFF', '#FFFF00'];
-        // Initialize arrays to store player data
         // Initialize arrays to store player data
         $players = [];
         $winProbabilities = [];
