@@ -2,7 +2,7 @@
 include 'includes/sqlCall.php';
 include 'includes/topbar.php';
 
-
+ob_start();
 try {
     // Connect to the database
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8mb4", $dbusername, $dbpassword);
@@ -404,7 +404,7 @@ foreach ($results_by_heat as $heat_number => $results):
             $homeprojectedscore = $awayprojectedscore = $homeheatscore = $awayheatscore = 0;
 
             // Loop over the players in the current heat
-            foreach ($results as &$result):
+            foreach ($results as &$result){
                 $playerID = $result['playerID'];
 
 
@@ -604,7 +604,7 @@ foreach ($results_by_heat as $heat_number => $results):
                         ?>
                     </td>
                 </tr>
-            <?php endforeach;
+            <?php }
 
             ?>
             </tbody>
