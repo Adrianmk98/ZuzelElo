@@ -968,9 +968,17 @@ $matchNumberMap = [
                 //$simulatedCumulativePoints = round(($cumulativeSingleTeamPoints[$teamID] ?? 0) + $simulatedHeatPoints, 2);
 
                 echo "<tr>      
-        <td>" . $teamName . "</td> 
-        <td>" . round($teamPoints[$teamID] ?? 0, 2) . "</td>
-        <td>" . $currentCumulativePoints . "</td>
+        <td>" . $teamName;
+                ?>
+                <source media="(min-width: 650px)" srcset="teamlogos/<?php echo file_exists("teamlogos/$teamID.jpg") ? $teamID : 0; ?>.jpg">
+                <img src="teamlogos/<?php echo file_exists("teamlogos/$teamID.jpg") ? $teamID : 0; ?>.jpg"
+                     style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
+                </picture>
+                <?php
+                echo "</td>
+        <td>" . round($teamPoints[$teamID] ?? 0, 2) . "</td>";
+
+                echo "<td>" . $currentCumulativePoints . "</td>
 
 
       </tr>";
