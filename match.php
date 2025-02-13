@@ -750,7 +750,7 @@ $matchNumberMap = [
             }
             echo "<h2>Heat $heat:</h2>";
             echo "<table border='1' style='background-color: #fff;'>";
-            echo "<tr><th>Slot</th><th>Player</th><th>Projected Points</th><th>Win Chance</th><th>2nd Place Probability</th><th>3rd Place Probability</th><th>4th Place Probability</th></tr>";
+            echo "<tr><th>Slot</th><th>Player</th><th>Projected Points</th><th>Win Chance</th></tr>";
 
             // Get Elo ratings for players in this heat
             $playerIDs = [];
@@ -847,12 +847,18 @@ $matchNumberMap = [
 
                 //echo "<tr style='$goldStyle'>";
                 echo "<td>$slot</td>";
-                echo "<td>" . $player['FirstName'] . " " . $player['lastName'] . "</td>";
-                echo "<td>" . round($playerResults['projected_points'], 2) . "</td>";
+                echo "<td>" . $player['FirstName'] . " " . $player['lastName'];
+                ?>
+                <source media="(min-width: 650px)" srcset="playerlogos/<?php echo file_exists("playerlogos/$playerID.jpg") ? $playerID : 0; ?>.jpg">
+                <img src="playerlogos/<?php echo file_exists("playerlogos/$playerID.jpg") ? $playerID : 0; ?>.jpg"
+                     style="max-width: 32px; max-height: 32px; width: auto; height: auto; display: block; margin: 0 auto;">
+                </picture>
+<?php
+                echo "</td><td>" . round($playerResults['projected_points'], 2) . "</td>";
                 echo "<td>" . round($playerResults['win_chance'] * 100, 2) . "%</td>";
-                echo "<td>" . round($playerResults['finishing_probs'][1] * 100, 2) . "%</td>";
-                echo "<td>" . round($playerResults['finishing_probs'][2] * 100, 2) . "%</td>";
-                echo "<td>" . round($playerResults['finishing_probs'][3] * 100, 2) . "%</td>";
+                //echo "<td>" . round($playerResults['finishing_probs'][1] * 100, 2) . "%</td>";
+                //echo "<td>" . round($playerResults['finishing_probs'][2] * 100, 2) . "%</td>";
+                //echo "<td>" . round($playerResults['finishing_probs'][3] * 100, 2) . "%</td>";
 
 // For the points column, keep the conditional formatting
 
@@ -941,7 +947,7 @@ $matchNumberMap = [
 
 // Display the table headers
             echo "<table border='1' style='background-color: #fff;'>";
-            echo "<tr><th>Team</th><th>Projected Points</th><th>Total Projected Points</th></tr>";
+            echo "<tr><th>Team</th><th>Projected Points</th></tr>";
 
             $team_stmt = $pdo->prepare("SELECT teamID, teamName FROM team WHERE teamID IN (?, ?) ORDER BY teamName DESC");
             $team_stmt->execute([$awayteamID, $hometeamID]);
@@ -976,15 +982,12 @@ $matchNumberMap = [
                 </picture>
                 <?php
                 echo "</td>
-        <td>" . round($teamPoints[$teamID] ?? 0, 2) . "</td>";
-
-                echo "<td>" . $currentCumulativePoints . "</td>
-
-
-      </tr>";
+    <td>(" .$currentCumulativePoints.") <span style='color: #00FF00; font-weight: bold;'>" . round($teamPoints[$teamID] ?? 0, 2) . "</span></td> </tr>";
             }
 
             echo "</table>";
+
+
 
 // Update cumulative team points for future heats
             foreach ($teamPoints as $teamID => $teamPointsValue) {
@@ -1000,11 +1003,8 @@ $matchNumberMap = [
 $content = ob_get_clean();
 include 'futurematchTeamScoreBreakdownTable.php';
 echo $content;
-
-
-//include 'matchPlayerPPOtable.php';
-
 ?>
+<br>
 
 
 
